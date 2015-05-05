@@ -144,18 +144,14 @@ class CDDA {
         }
     }
 
-    extractAllTracks(imgFile:File, dstDir:DirectoryEntrySync) {
-        for (var i = 1; i < this.tracks.length; i++) {
-            if (this.tracks[i] && this.tracks[i].type == 'AUDIO') {
-                var dstName = 'track' + i + '.wav';
-                console.log(dstName);
-                var dstFile = dstDir.getFile(dstName, {create:true});
-                this.extractTrack(imgFile, i, dstFile);
-            }
-        }
+    maxTrack():number {
+        return this.tracks.length - 1;
     }
 
-    extractTrack(imgFile:File, track:number, dstFile:FileEntrySync) {
+    extractTrack(imgFile:File, track:number, dstDir:DirectoryEntrySync) {
+        if (!this.tracks[track] || this.tracks[track].type != 'AUDIO')
+            return;
+
         var start = this.indexToSector(this.tracks[track].index[1]) * 2352;
         var end:number;
         if (this.tracks[track+1]) {
@@ -168,6 +164,9 @@ class CDDA {
         var reader = new FileReaderSync();
         var header = this.createWaveHeader(end - start);
 
+        var dstName = 'track' + track + '.wav';
+        console.log(dstName);
+        var dstFile = dstDir.getFile(dstName, {create:true});
         var writer = dstFile.createWriter();
         writer.truncate(0);
         writer.write(new Blob([header]));
@@ -209,6 +208,7 @@ class CDDA {
 class Installer {
     private imgFile:File;
     private cdda:CDDA;
+    private step = 1;
 
     setFile(file:File) {
         if (file.name.toLowerCase().endsWith('.img'))
@@ -223,17 +223,21 @@ class Installer {
         return this.imgFile && this.cdda && true;
     }
 
-    install() {
+    install():number[] {
         var localfs = self.webkitRequestFileSystemSync(self.PERSISTENT, 650*1024*1024);
-        var isofs = new ISO9660FileSystem(new SectorReader(this.imgFile));
+        if (this.step == 1) {
+            var isofs = new ISO9660FileSystem(new SectorReader(this.imgFile));
 
-        var gamedata = isofs.getDirEnt('gamedata', isofs.rootDir());
-        for (var e of isofs.readDir(gamedata)) {
-            if (e.name.toLowerCase().endsWith('.ald'))
-                this.copyFile(e, localfs.root, isofs);
+            var gamedata = isofs.getDirEnt('gamedata', isofs.rootDir());
+            for (var e of isofs.readDir(gamedata)) {
+                if (e.name.toLowerCase().endsWith('.ald'))
+                    this.copyFile(e, localfs.root, isofs);
+            }
+        } else {
+            this.cdda.extractTrack(this.imgFile, this.step, localfs.root);
         }
-        this.cdda.extractAllTracks(this.imgFile, localfs.root);
-        console.log('Done!');
+        this.step++;
+        return [this.step - 1, this.cdda.maxTrack()];
     }
 
     copyFile(src:DirEnt, dstDir:DirectoryEntrySync, isofs:ISO9660FileSystem) {
@@ -249,12 +253,18 @@ class Installer {
 
 var installer = new Installer();
 
+function install1step() {
+    var progress = installer.install();
+    postMessage({command:'progress', value:progress[0], max:progress[1]});
+    if (progress[0] < progress[1])
+        setTimeout(install1step, 100);
+}
+
 function onMessage(evt: MessageEvent) {
-    console.log('worker got message', evt);
     if (evt.data.command == 'setFile') {
         installer.setFile(evt.data.file);
         if (installer.ready())
-            installer.install();
+            install1step();
     }
 }
 

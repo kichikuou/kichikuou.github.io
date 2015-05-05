@@ -12,15 +12,12 @@ class WorkerThread {
     }
 
     onMessage(evt: MessageEvent) {
-        console.log('msg from worker', evt);
+        if (evt.data.command == 'progress')
+            console.log(evt.data.value + ' / ' + evt.data.max);
     }
     onError(evt: Event) {
         console.log('worker error', evt);
     }
-}
-
-function parseCue(file:File) {
-
 }
 
 var worker = new WorkerThread();
