@@ -134,11 +134,11 @@ class CDDA {
             switch (fields[0]) {
             case 'TRACK':
                 currentTrack = {type:fields[2], index:[]};
-                this.tracks[fields[1]] = currentTrack;
+                this.tracks[Number(fields[1])] = currentTrack;
                 break;
             case 'INDEX':
                 if (currentTrack)
-                    currentTrack.index[fields[1]] = fields[2];
+                    currentTrack.index[Number(fields[1])] = fields[2];
                 break;
             }
         }

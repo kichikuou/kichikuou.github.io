@@ -7,7 +7,7 @@ class WorkerThread {
         this.worker.addEventListener('error', this.onError.bind(this));
     }
 
-    send(msg) {
+    send(msg:any) {
         this.worker.postMessage(msg);
     }
 
@@ -23,11 +23,11 @@ class WorkerThread {
 var worker = new WorkerThread();
 var file:File;
 
-function handleFileSelect(evt) {
+function handleFileSelect(evt:Event) {
     console.log(evt);
-    file = evt.target.files[0];
+    file = (<HTMLInputElement>evt.target).files[0];
     worker.send({command:'setFile', file:file});
 }
 
 document.getElementById('fileselect').addEventListener('change', handleFileSelect, false);
-(<any>navigator).webkitPersistentStorage.requestQuota(650*1024*1024, function(x) { console.log(x); });
+(<any>navigator).webkitPersistentStorage.requestQuota(650*1024*1024, (x:any) => console.log(x));
