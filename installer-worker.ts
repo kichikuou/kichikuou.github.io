@@ -152,6 +152,7 @@ class CDDA {
         if (!this.tracks[track] || this.tracks[track].type != 'AUDIO')
             return;
 
+        var startTime = performance.now();
         var start = this.indexToSector(this.tracks[track].index[1]) * 2352;
         var end:number;
         if (this.tracks[track+1]) {
@@ -161,23 +162,31 @@ class CDDA {
             end = imgFile.size;
         }
 
-        var reader = new FileReaderSync();
-        var header = this.createWaveHeader(end - start);
-
         var dstName = 'track' + track + '.wav';
-        console.log(dstName);
         var dstFile = dstDir.getFile(dstName, {create:true});
+        if (dstFile.getMetadata().size - 44 == end - start) {
+            console.log(dstName + ': skipped');
+            return;
+        }
         var writer = dstFile.createWriter();
         writer.truncate(0);
-        writer.write(new Blob([header]));
+        writer.write(new Blob([this.createWaveHeader(end - start)]));
 
+        var reader = new FileReaderSync();
         var chunk = 1024*1024;
         while (start < end) {
             var size = Math.min(chunk, end - start);
-            var data = reader.readAsArrayBuffer(imgFile.slice(start, start + size));
-            writer.write(new Blob([data]));
-            start += size;
+            try {
+                var data = reader.readAsArrayBuffer(imgFile.slice(start, start + size));
+                writer.write(new Blob([data]));
+                start += size;
+            } catch (e) {
+                if (e.code == DOMException.INVALID_STATE_ERR)
+                    postMessage({command:'writeFailed'});
+                throw e;
+            }
         }
+        console.log(dstName, performance.now() - startTime, 'msec');
     }
 
     indexToSector(index:string):number {
@@ -241,13 +250,18 @@ class Installer {
     }
 
     copyFile(src:DirEnt, dstDir:DirectoryEntrySync, isofs:ISO9660FileSystem) {
-        console.log(src.name); console.log(performance.now());
-        var writer = dstDir.getFile(src.name.toLowerCase(), {create:true}).createWriter();
+        var startTime = performance.now();
+        var dstFile = dstDir.getFile(src.name.toLowerCase(), {create:true});
+        var writer = dstFile.createWriter();
+        if (dstFile.getMetadata().size == src.size) {
+            console.log(src.name + ': skip');
+            return;
+        }
         writer.truncate(0);
         isofs.readFile(src, function(bufs:ArrayBufferView[]) {
             writer.write(new Blob(bufs));
         });
-        console.log(performance.now());
+        console.log(src.name, performance.now() - startTime, 'msec');
     }
 }
 

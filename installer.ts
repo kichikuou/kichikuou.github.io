@@ -1,10 +1,20 @@
-class WorkerThread {
+class InstallerHost {
     private worker: Worker;
+    private files: File[] = [];
 
     constructor() {
+        this.initWorker();
+    }
+
+    initWorker() {
         this.worker = new Worker('installer-worker.js');
         this.worker.addEventListener('message', this.onMessage.bind(this));
         this.worker.addEventListener('error', this.onError.bind(this));
+    }
+
+    setFile(file:File) {
+        this.send({command:'setFile', file:file});
+        this.files.push(file);
     }
 
     send(msg:any) {
@@ -12,21 +22,34 @@ class WorkerThread {
     }
 
     onMessage(evt: MessageEvent) {
-        if (evt.data.command == 'progress')
+        switch (evt.data.command) {
+        case 'progress':
             console.log(evt.data.value + ' / ' + evt.data.max);
+            break;
+        case 'writeFailed':
+            // Chrome may fail to write to local filesystem because of the
+            // 500MB total blob size limitation
+            // (https://code.google.com/p/chromium/issues/detail?id=375297).
+            // We have to terminate the worker to free up references to blobs
+            // and resume install in new worker.
+            console.log('terminating worker');
+            this.worker.terminate();
+            this.initWorker();
+            for (var f of this.files)
+                this.send({command:'setFile', file:f});
+            break;
+        }
     }
     onError(evt: Event) {
         console.log('worker error', evt);
     }
 }
 
-var worker = new WorkerThread();
-var file:File;
+var host = new InstallerHost();
 
 function handleFileSelect(evt:Event) {
-    console.log(evt);
-    file = (<HTMLInputElement>evt.target).files[0];
-    worker.send({command:'setFile', file:file});
+    var file = (<HTMLInputElement>evt.target).files[0];
+    host.setFile(file);
 }
 
 document.getElementById('fileselect').addEventListener('change', handleFileSelect, false);
