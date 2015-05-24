@@ -40,6 +40,9 @@ class InstallerHost {
         case 'progress':
             view.setProgress(evt.data.value, evt.data.max);
             break;
+        case 'complete':
+            view.onComplete();
+            break;
         case 'writeFailed':
             // Chrome may fail to write to local filesystem because of the
             // 500MB total blob size limitation
@@ -65,6 +68,14 @@ class InstallerView {
         $('#fileselect').addEventListener('change', this.handleFileSelect.bind(this), false);
         document.body.ondragover = this.handleDragOver.bind(this);
         document.body.ondrop = this.handleDrop.bind(this);
+        isInstalled().then(function(installed) {
+            if (installed)
+                $('.installed').classList.remove('hidden');
+            else
+                $('.files').classList.remove('hidden');
+        }, function() {
+            $('.unsupported').classList.remove('hidden');
+        });
     }
 
     setReadyState(imgReady:boolean, cueReady:boolean) {
@@ -79,11 +90,11 @@ class InstallerView {
         $('.progress').classList.remove('hidden');
         (<HTMLProgressElement>$('#progressBar')).max = max;
         (<HTMLProgressElement>$('#progressBar')).value = value;
+    }
 
-        if (value >= max) {
-            $('.progress').classList.add('hidden');
-            $('.installed').classList.remove('hidden');
-        }
+    onComplete() {
+        $('.progress').classList.add('hidden');
+        $('.installed').classList.remove('hidden');
     }
 
     private handleFileSelect(evt:Event) {

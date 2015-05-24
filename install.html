@@ -17,7 +17,7 @@
     </ul>
   </div>
 
-  <div class="installer">
+  <div class="contents">
     <div class="instructions">
       <h3 id="-">インストール手順</h3>
       <ol>
@@ -37,7 +37,7 @@
       </ol>
     </div>
 
-    <div class="files">
+    <div class="files hidden">
       <ul>
         <li id="imgReady" class="notready"><i class="fa fa-file"></i> <code>KICHIKUOU.img</code></li>
         <li id="cueReady" class="notready"><i class="fa fa-file"></i> <code>KICHIKUOU.cue</code></li>
@@ -54,8 +54,13 @@
       <a class="pure-button pure-button-primary" href="play.html">ゲーム開始</a>
       <button class="pure-button">アンインストール</button>
     </div>
+
+    <div class="unsupported hidden">
+      このブラウザでは利用できません。
+    </div>
   </div>
 
+  <script src="common.js"></script>
   <script src="installer.js"></script>
 </body>
 </html>

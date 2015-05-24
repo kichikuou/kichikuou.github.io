@@ -9,6 +9,16 @@ class XSystem35 {
     private naclModule:PNaClElement;
 
     constructor() {
+        isInstalled().then(this.init.bind(this),
+            () => $('.unsupported').classList.remove('hidden'));
+    }
+
+    init(installed:boolean) {
+        if (!installed) {
+            $('.notInstalled').classList.remove('hidden');
+            return;
+        }
+        $('#contents').classList.remove('hidden');
         var listener = $('#contents');
         listener.addEventListener('load', this.moduleDidLoad.bind(this), true);
         listener.addEventListener('message', (<any>window).handleMessage, true);

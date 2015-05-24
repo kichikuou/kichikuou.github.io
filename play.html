@@ -16,12 +16,21 @@
     </ul>
   </div>
 
-  <div id="contents">
+  <div id="contents" class="hidden">
     <div class="status">Loading...</div>
     <embed id="nacl_module" width=640 height=480 src="xsystem35/src/pnacl/Release/xsystem35.nmf" type="application/x-pnacl"></embed>
   </div>
 
-  <script type="text/javascript" src="xsystem35/xsystem35.js"></script>
-  <script type="text/javascript" src="play.js"></script>
+  <div class="contents notInstalled hidden">
+    インストールされていません。先に<a href="install.html">インストール</a>してください。
+  </div>
+
+  <div class="contents unsupported hidden">
+    このブラウザでは利用できません。
+  </div>
+
+  <script src="common.js"></script>
+  <script src="play.js"></script>
+  <script src="xsystem35/xsystem35.js"></script>
 </body>
 </html>

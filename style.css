@@ -26,13 +26,13 @@
     float: right;
 }
 
-.installer {
+.contents {
     width: 640px;
-    margin: 0px auto;
+    margin: 4ex auto 0;
 }
 
 .instructions {
-    margin: 4ex 0px;
+    margin-bottom: 4ex;
 }
 
 .instructions li {
@@ -49,6 +49,10 @@
 
 .files li.notready:after {
     content: " (未選択)";
+}
+
+.unsupported {
+    color: red;
 }
 
 .hidden {

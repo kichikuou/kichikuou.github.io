@@ -217,7 +217,6 @@ class CDDA {
 class Installer {
     private imgFile:File;
     private cdda:CDDA;
-    private step = 1;
 
     setFile(file:File) {
         if (file.name.toLowerCase().endsWith('.img'))
@@ -235,21 +234,24 @@ class Installer {
     imgReady(): boolean { return !!this.imgFile; }
     cueReady(): boolean { return !!this.cdda; }
 
-    install():number[] {
+    install() {
         var localfs = self.webkitRequestFileSystemSync(self.PERSISTENT, 650*1024*1024);
-        if (this.step == 1) {
-            var isofs = new ISO9660FileSystem(new SectorReader(this.imgFile));
+        for (var track = 1; track <= this.cdda.maxTrack(); track++) {
+            if (track == 1) {
+                var isofs = new ISO9660FileSystem(new SectorReader(this.imgFile));
 
-            var gamedata = isofs.getDirEnt('gamedata', isofs.rootDir());
-            for (var e of isofs.readDir(gamedata)) {
-                if (e.name.toLowerCase().endsWith('.ald'))
-                    this.copyFile(e, localfs.root, isofs);
+                var gamedata = isofs.getDirEnt('gamedata', isofs.rootDir());
+                for (var e of isofs.readDir(gamedata)) {
+                    if (e.name.toLowerCase().endsWith('.ald'))
+                        this.copyFile(e, localfs.root, isofs);
+                }
+            } else {
+                this.cdda.extractTrack(this.imgFile, track, localfs.root);
             }
-        } else {
-            this.cdda.extractTrack(this.imgFile, this.step, localfs.root);
+            postMessage({command:'progress', value:track, max:this.cdda.maxTrack()});
         }
-        this.step++;
-        return [this.step - 1, this.cdda.maxTrack()];
+        localfs.root.getDirectory('save', {create:true});
+        postMessage({command:'complete'});
     }
 
     copyFile(src:DirEnt, dstDir:DirectoryEntrySync, isofs:ISO9660FileSystem) {
@@ -270,13 +272,6 @@ class Installer {
 
 var installer = new Installer();
 
-function install1step() {
-    var progress = installer.install();
-    postMessage({command:'progress', value:progress[0], max:progress[1]});
-    if (progress[0] < progress[1])
-        setTimeout(install1step, 100);
-}
-
 function onMessage(evt: MessageEvent) {
     switch (evt.data.command) {
     case 'setFile':
@@ -285,7 +280,7 @@ function onMessage(evt: MessageEvent) {
         break;
     case 'install':
         if (installer.ready())
-            install1step();
+            installer.install();
         break;
     }
 }
