@@ -1,0 +1,40 @@
+.navbar {
+    background: black;
+    color: white;
+}
+
+.pure-menu-heading {
+    text-transform: none;
+    font-weight: bold;
+    color: white;
+}
+
+.navbar .pure-menu-selected a {
+    color: white;
+}
+.navbar a {
+    color: #cccccc;
+}
+.navbar li a:hover,
+.navbar li a:focus {
+    background: none;
+    border: none;
+    color: #aaaaaa;
+}
+
+.navbar ul {
+    float: right;
+}
+
+.app {
+    width: 640px;
+    margin: 0px auto;
+}
+
+.instructions {
+    margin: 4ex 0px;
+}
+
+.instructions li {
+    margin-bottom: 1ex;
+}
