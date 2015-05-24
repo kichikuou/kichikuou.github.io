@@ -1,3 +1,5 @@
+var $: (selector:string)=>Element = document.querySelector.bind(document);
+
 class InstallerHost {
     private worker: Worker;
     private files: File[] = [];
@@ -58,8 +60,6 @@ class InstallerHost {
     }
 }
 
-var $ = document.querySelector.bind(document);
-
 class InstallerView {
     constructor() {
         $('#fileselect').addEventListener('change', this.handleFileSelect.bind(this), false);
@@ -77,8 +77,8 @@ class InstallerView {
     setProgress(value:number, max:number) {
         $('.files').classList.add('hidden');
         $('.progress').classList.remove('hidden');
-        $('#progressBar').max = max;
-        $('#progressBar').value = value;
+        (<HTMLProgressElement>$('#progressBar')).max = max;
+        (<HTMLProgressElement>$('#progressBar')).value = value;
 
         if (value >= max) {
             $('.progress').classList.add('hidden');
@@ -105,7 +105,6 @@ class InstallerView {
         for (var i = 0; i < files.length; i++)
             host.setFile(files[i]);
     }
-
 }
 
 var host = new InstallerHost();

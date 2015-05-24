@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>鬼畜王 on Chrome</title>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="navbar pure-menu pure-menu-horizontal">
+    <span class="pure-menu-heading">鬼畜王 on Chrome</span>
+    <ul class="pure-menu-list">
+      <li class="pure-menu-item"><a href="index.html" class="pure-menu-link">ホーム</a></li>
+      <li class="pure-menu-item"><a href="install.html" class="pure-menu-link">インストール</a></li>
+      <li class="pure-menu-item pure-menu-selected"><a href="#" class="pure-menu-link">ゲーム</a></li>
+    </ul>
+  </div>
+
+  <div id="contents">
+    <div class="status">Loading...</div>
+    <embed id="nacl_module" width=640 height=480 src="xsystem35/src/pnacl/Release/xsystem35.nmf" type="application/x-pnacl"></embed>
+  </div>
+
+  <script type="text/javascript" src="xsystem35/xsystem35.js"></script>
+  <script type="text/javascript" src="play.js"></script>
+</body>
+</html>

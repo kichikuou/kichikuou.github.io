@@ -54,3 +54,8 @@
 .hidden {
     display: none;
 }
+
+#contents {
+    margin: 0 auto;
+    width: 640px;
+}
