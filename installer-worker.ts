@@ -232,6 +232,9 @@ class Installer {
         return this.imgFile && this.cdda && true;
     }
 
+    imgReady(): boolean { return !!this.imgFile; }
+    cueReady(): boolean { return !!this.cdda; }
+
     install():number[] {
         var localfs = self.webkitRequestFileSystemSync(self.PERSISTENT, 650*1024*1024);
         if (this.step == 1) {
@@ -275,10 +278,15 @@ function install1step() {
 }
 
 function onMessage(evt: MessageEvent) {
-    if (evt.data.command == 'setFile') {
+    switch (evt.data.command) {
+    case 'setFile':
         installer.setFile(evt.data.file);
+        postMessage({command:'readyState', imgReady:installer.imgReady(), cueReady:installer.cueReady()});
+        break;
+    case 'install':
         if (installer.ready())
             install1step();
+        break;
     }
 }
 

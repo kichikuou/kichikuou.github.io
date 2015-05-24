@@ -26,7 +26,7 @@
     float: right;
 }
 
-.app {
+.installer {
     width: 640px;
     margin: 0px auto;
 }
@@ -37,4 +37,20 @@
 
 .instructions li {
     margin-bottom: 1ex;
+}
+
+.files ul {
+    list-style-type: none;
+}
+
+.files li.notready {
+    color: #808080;
+}
+
+.files li.notready:after {
+    content: " (未選択)";
+}
+
+.hidden {
+    display: none;
 }

@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="ja">
-
+<head>
   <meta charset="utf-8">
   <title>鬼畜王 on Chrome インストーラー</title>
-  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="style.css">
-
+</head>
+<body>
   <div class="navbar pure-menu pure-menu-horizontal">
     <span class="pure-menu-heading">鬼畜王 on Chrome</span>
     <ul class="pure-menu-list">
-      <li class="pure-menu-item"><a href="#" class="pure-menu-link">ホーム</a></li>
+      <li class="pure-menu-item"><a href="index.html" class="pure-menu-link">ホーム</a></li>
       <li class="pure-menu-item pure-menu-selected"><a href="#" class="pure-menu-link">インストール</a></li>
-      <li class="pure-menu-item"><a href="#" class="pure-menu-link">ゲーム</a></li>
+      <li class="pure-menu-item"><a href="play.html" class="pure-menu-link">ゲーム</a></li>
     </ul>
   </div>
 
-  <div class="app">
+  <div class="installer">
     <div class="instructions">
       <h3 id="-">インストール手順</h3>
       <ol>
@@ -35,7 +37,25 @@
       </ol>
     </div>
 
-    <input type="file" id="fileselect" />
+    <div class="files">
+      <ul>
+        <li id="imgReady" class="notready"><i class="fa fa-file"></i> <code>KICHIKUOU.img</code></li>
+        <li id="cueReady" class="notready"><i class="fa fa-file"></i> <code>KICHIKUOU.cue</code></li>
+      </ul>
+      <input type="file" id="fileselect" />
+    </div>
+
+    <div class="progress hidden">
+      インストールしています : <progress id="progressBar" value=0></progress>
+    </div>
+
+    <div class="installed hidden">
+      インストールが完了しました。
+      <a class="pure-button pure-button-primary" href="play.html">ゲーム開始</a>
+      <button class="pure-button">アンインストール</button>
+    </div>
   </div>
+
   <script src="installer.js"></script>
+</body>
 </html>

@@ -17,14 +17,26 @@ class InstallerHost {
         this.files.push(file);
     }
 
-    send(msg:any) {
+    startInstall() {
+        (<any>navigator).webkitPersistentStorage.requestQuota(650*1024*1024, ()=>{
+            this.send({command:'install'});
+            view.setProgress(0, 1);
+        }); // TODO: add error handler
+    }
+
+    private send(msg:any) {
         this.worker.postMessage(msg);
     }
 
-    onMessage(evt: MessageEvent) {
+    private onMessage(evt: MessageEvent) {
         switch (evt.data.command) {
+        case 'readyState':
+            view.setReadyState(evt.data.imgReady, evt.data.cueReady);
+            if (evt.data.imgReady && evt.data.cueReady)
+                this.startInstall();
+            break;
         case 'progress':
-            console.log(evt.data.value + ' / ' + evt.data.max);
+            view.setProgress(evt.data.value, evt.data.max);
             break;
         case 'writeFailed':
             // Chrome may fail to write to local filesystem because of the
@@ -40,17 +52,61 @@ class InstallerHost {
             break;
         }
     }
-    onError(evt: Event) {
+
+    private onError(evt: Event) {
         console.log('worker error', evt);
     }
 }
 
-var host = new InstallerHost();
+var $ = document.querySelector.bind(document);
 
-function handleFileSelect(evt:Event) {
-    var file = (<HTMLInputElement>evt.target).files[0];
-    host.setFile(file);
+class InstallerView {
+    constructor() {
+        $('#fileselect').addEventListener('change', this.handleFileSelect.bind(this), false);
+        document.body.ondragover = this.handleDragOver.bind(this);
+        document.body.ondrop = this.handleDrop.bind(this);
+    }
+
+    setReadyState(imgReady:boolean, cueReady:boolean) {
+        if (imgReady)
+            $('#imgReady').classList.remove('notready');
+        if (cueReady)
+            $('#cueReady').classList.remove('notready');
+    }
+
+    setProgress(value:number, max:number) {
+        $('.files').classList.add('hidden');
+        $('.progress').classList.remove('hidden');
+        $('#progressBar').max = max;
+        $('#progressBar').value = value;
+
+        if (value >= max) {
+            $('.progress').classList.add('hidden');
+            $('.installed').classList.remove('hidden');
+        }
+    }
+
+    private handleFileSelect(evt:Event) {
+        var files = (<HTMLInputElement>evt.target).files;
+        for (var i = 0; i < files.length; i++)
+            host.setFile(files[i]);
+    }
+
+    private handleDragOver(evt:DragEvent) {
+        evt.stopPropagation();
+        evt.preventDefault();
+        evt.dataTransfer.dropEffect = 'copy';
+    }
+
+    private handleDrop(evt:DragEvent) {
+        evt.stopPropagation();
+        evt.preventDefault();
+        var files = evt.dataTransfer.files;
+        for (var i = 0; i < files.length; i++)
+            host.setFile(files[i]);
+    }
+
 }
 
-document.getElementById('fileselect').addEventListener('change', handleFileSelect, false);
-(<any>navigator).webkitPersistentStorage.requestQuota(650*1024*1024, (x:any) => console.log(x));
+var host = new InstallerHost();
+var view = new InstallerView();
