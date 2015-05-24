@@ -3,6 +3,7 @@ var $: (selector:string)=>Element = document.querySelector.bind(document);
 interface PNaClElement extends Element {
     lastError: string;
     exitStatus: number;
+    postMessage: (message:any)=>void;
 }
 
 class XSystem35 {
@@ -13,7 +14,11 @@ class XSystem35 {
             () => $('.unsupported').classList.remove('hidden'));
     }
 
-    init(installed:boolean) {
+    postMessage(message:any) {
+        this.naclModule.postMessage(message);
+    }
+
+    private init(installed:boolean) {
         if (!installed) {
             $('.notInstalled').classList.remove('hidden');
             return;
@@ -27,22 +32,22 @@ class XSystem35 {
         this.naclModule = <PNaClElement>$('#nacl_module');
     }
 
-    moduleDidLoad() {
+    private moduleDidLoad() {
         this.updateStatus('　');
     }
 
-    handleError(event:Event) {
+    private handleError(event:Event) {
         this.updateStatus('ERROR: ' + this.naclModule.lastError);
     }
 
-    handleCrash(event:Event) {
+    private handleCrash(event:Event) {
         if (this.naclModule.exitStatus == -1)
             this.updateStatus('CRASHED');
         else
             this.updateStatus('EXITED: ' + this.naclModule.exitStatus);
     }
 
-    updateStatus(status:string) {
+    private updateStatus(status:string) {
         $('#contents .status').textContent = status;
     }
 }
