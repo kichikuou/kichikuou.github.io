@@ -109,9 +109,11 @@ class InstallerView {
     }
 
     private handleFileSelect(evt:Event) {
-        var files = (<HTMLInputElement>evt.target).files;
+        var input = <HTMLInputElement>evt.target;
+        var files = input.files;
         for (var i = 0; i < files.length; i++)
             host.setFile(files[i]);
+        input.value = '';
     }
 
     private handleDragOver(evt:DragEvent) {

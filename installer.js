@@ -93,9 +93,11 @@ var InstallerView = (function () {
         $('.uninstalled').classList.remove('hidden');
     };
     InstallerView.prototype.handleFileSelect = function (evt) {
-        var files = evt.target.files;
+        var input = evt.target;
+        var files = input.files;
         for (var i = 0; i < files.length; i++)
             host.setFile(files[i]);
+        input.value = '';
     };
     InstallerView.prototype.handleDragOver = function (evt) {
         evt.stopPropagation();

@@ -43,6 +43,10 @@
     list-style-type: none;
 }
 
+.files li {
+    color: #0078e7;
+}
+
 .files li.notready {
     color: #808080;
 }
