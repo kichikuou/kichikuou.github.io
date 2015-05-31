@@ -1,0 +1,12 @@
+{
+  "program": {
+    "portable": {
+      "pnacl-translate": {
+        "url": "xsystem35.pexe"
+      },
+      "pnacl-debug": {
+        "url": "xsystem35_unstripped.bc"
+      }
+    }
+  }
+}
