@@ -74,6 +74,8 @@ class InstallerView {
         document.body.ondragover = this.handleDragOver.bind(this);
         document.body.ondrop = this.handleDrop.bind(this);
         $('#uninstall').addEventListener('click', this.handleUninstall.bind(this));
+        window.onbeforeunload = this.handleBeforeunload.bind(this);
+
         isInstalled().then(function(installed) {
             if (installed)
                 $('.installed').classList.remove('hidden');
@@ -106,6 +108,11 @@ class InstallerView {
     onUninstallComplete() {
         $('.uninstalling').classList.add('hidden');
         $('.uninstalled').classList.remove('hidden');
+    }
+
+    private handleBeforeunload():any {
+        if (!$('.progress').classList.contains('hidden'))
+            return "このページを離れるとインストールが中断されます。";
     }
 
     private handleFileSelect(evt:Event) {

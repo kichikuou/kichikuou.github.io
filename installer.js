@@ -63,6 +63,7 @@ var InstallerView = (function () {
         document.body.ondragover = this.handleDragOver.bind(this);
         document.body.ondrop = this.handleDrop.bind(this);
         $('#uninstall').addEventListener('click', this.handleUninstall.bind(this));
+        window.onbeforeunload = this.handleBeforeunload.bind(this);
         isInstalled().then(function (installed) {
             if (installed)
                 $('.installed').classList.remove('hidden');
@@ -91,6 +92,10 @@ var InstallerView = (function () {
     InstallerView.prototype.onUninstallComplete = function () {
         $('.uninstalling').classList.add('hidden');
         $('.uninstalled').classList.remove('hidden');
+    };
+    InstallerView.prototype.handleBeforeunload = function () {
+        if (!$('.progress').classList.contains('hidden'))
+            return "このページを離れるとインストールが中断されます。";
     };
     InstallerView.prototype.handleFileSelect = function (evt) {
         var input = evt.target;
