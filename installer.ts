@@ -1,5 +1,3 @@
-var $: (selector:string)=>Element = document.querySelector.bind(document);
-
 class InstallerHost {
     private worker: Worker;
     private files: File[] = [];

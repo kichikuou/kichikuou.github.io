@@ -59,6 +59,10 @@
     display: none;
 }
 
+.center {
+    text-align: center;
+}
+
 #contents {
     margin: 0 auto;
     width: 640px;

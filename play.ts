@@ -1,5 +1,3 @@
-var $: (selector:string)=>Element = document.querySelector.bind(document);
-
 interface PNaClElement extends Element {
     lastError: string;
     exitStatus: number;
