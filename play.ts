@@ -30,7 +30,7 @@ class XSystem35 {
         listener.addEventListener('crash', this.handleCrash.bind(this), true);
         this.naclModule = <PNaClElement>$('#nacl_module');
 
-        window.webkitRequestFileSystem(window.PERSISTENT, 0,
+        requestFileSystem().then(
             (fs) => this.audio = new AudioPlayer(fs.root.toURL()));
     }
 

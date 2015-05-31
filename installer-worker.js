@@ -272,6 +272,18 @@ var Installer = (function () {
     };
     return Installer;
 })();
+function uninstall() {
+    var fs = self.webkitRequestFileSystemSync(self.PERSISTENT, 0);
+    var entries = fs.root.createReader().readEntries();
+    for (var _i = 0; _i < entries.length; _i++) {
+        var entry = entries[_i];
+        if (entry.isDirectory)
+            entry.removeRecursively();
+        else
+            entry.remove();
+    }
+    postMessage({ command: 'uninstalled' });
+}
 var installer = new Installer();
 function onMessage(evt) {
     switch (evt.data.command) {
@@ -282,6 +294,9 @@ function onMessage(evt) {
         case 'install':
             if (installer.ready())
                 installer.install();
+            break;
+        case 'uninstall':
+            uninstall();
             break;
     }
 }

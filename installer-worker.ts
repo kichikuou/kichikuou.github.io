@@ -270,6 +270,18 @@ class Installer {
     }
 }
 
+function uninstall() {
+    var fs = self.webkitRequestFileSystemSync(self.PERSISTENT, 0);
+    var entries = fs.root.createReader().readEntries();
+    for (var entry of entries) {
+        if (entry.isDirectory)
+            (<DirectoryEntrySync>entry).removeRecursively();
+        else
+            entry.remove();
+    }
+    postMessage({command:'uninstalled'});
+}
+
 var installer = new Installer();
 
 function onMessage(evt: MessageEvent) {
@@ -281,6 +293,9 @@ function onMessage(evt: MessageEvent) {
     case 'install':
         if (installer.ready())
             installer.install();
+        break;
+    case 'uninstall':
+        uninstall();
         break;
     }
 }

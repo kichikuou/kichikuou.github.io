@@ -19,6 +19,9 @@ var InstallerHost = (function () {
             view.setProgress(0, 1);
         });
     };
+    InstallerHost.prototype.uninstall = function () {
+        this.send({ command: 'uninstall' });
+    };
     InstallerHost.prototype.send = function (msg) {
         this.worker.postMessage(msg);
     };
@@ -34,6 +37,9 @@ var InstallerHost = (function () {
                 break;
             case 'complete':
                 view.onComplete();
+                break;
+            case 'uninstalled':
+                view.onUninstallComplete();
                 break;
             case 'writeFailed':
                 console.log('terminating worker');
@@ -56,6 +62,7 @@ var InstallerView = (function () {
         $('#fileselect').addEventListener('change', this.handleFileSelect.bind(this), false);
         document.body.ondragover = this.handleDragOver.bind(this);
         document.body.ondrop = this.handleDrop.bind(this);
+        $('#uninstall').addEventListener('click', this.handleUninstall.bind(this));
         isInstalled().then(function (installed) {
             if (installed)
                 $('.installed').classList.remove('hidden');
@@ -81,6 +88,10 @@ var InstallerView = (function () {
         $('.progress').classList.add('hidden');
         $('.installed').classList.remove('hidden');
     };
+    InstallerView.prototype.onUninstallComplete = function () {
+        $('.uninstalling').classList.add('hidden');
+        $('.uninstalled').classList.remove('hidden');
+    };
     InstallerView.prototype.handleFileSelect = function (evt) {
         var files = evt.target.files;
         for (var i = 0; i < files.length; i++)
@@ -97,6 +108,13 @@ var InstallerView = (function () {
         var files = evt.dataTransfer.files;
         for (var i = 0; i < files.length; i++)
             host.setFile(files[i]);
+    };
+    InstallerView.prototype.handleUninstall = function (evt) {
+        if (!window.confirm("アンインストールしてよろしいですか？ セーブデータも削除されます。"))
+            return;
+        host.uninstall();
+        $('.installed').classList.add('hidden');
+        $('.uninstalling').classList.remove('hidden');
     };
     return InstallerView;
 })();

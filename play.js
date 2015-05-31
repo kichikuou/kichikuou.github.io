@@ -18,7 +18,7 @@ var XSystem35 = (function () {
         listener.addEventListener('error', this.handleError.bind(this), true);
         listener.addEventListener('crash', this.handleCrash.bind(this), true);
         this.naclModule = $('#nacl_module');
-        window.webkitRequestFileSystem(window.PERSISTENT, 0, function (fs) { return _this.audio = new AudioPlayer(fs.root.toURL()); });
+        requestFileSystem().then(function (fs) { return _this.audio = new AudioPlayer(fs.root.toURL()); });
     };
     XSystem35.prototype.moduleDidLoad = function () {
         this.updateStatus('　');

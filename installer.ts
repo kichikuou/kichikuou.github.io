@@ -24,6 +24,10 @@ class InstallerHost {
         }); // TODO: add error handler
     }
 
+    uninstall() {
+        this.send({command:'uninstall'});
+    }
+
     private send(msg:any) {
         this.worker.postMessage(msg);
     }
@@ -40,6 +44,9 @@ class InstallerHost {
             break;
         case 'complete':
             view.onComplete();
+            break;
+        case 'uninstalled':
+            view.onUninstallComplete();
             break;
         case 'writeFailed':
             // Chrome may fail to write to local filesystem because of the
@@ -66,6 +73,7 @@ class InstallerView {
         $('#fileselect').addEventListener('change', this.handleFileSelect.bind(this), false);
         document.body.ondragover = this.handleDragOver.bind(this);
         document.body.ondrop = this.handleDrop.bind(this);
+        $('#uninstall').addEventListener('click', this.handleUninstall.bind(this));
         isInstalled().then(function(installed) {
             if (installed)
                 $('.installed').classList.remove('hidden');
@@ -95,6 +103,11 @@ class InstallerView {
         $('.installed').classList.remove('hidden');
     }
 
+    onUninstallComplete() {
+        $('.uninstalling').classList.add('hidden');
+        $('.uninstalled').classList.remove('hidden');
+    }
+
     private handleFileSelect(evt:Event) {
         var files = (<HTMLInputElement>evt.target).files;
         for (var i = 0; i < files.length; i++)
@@ -113,6 +126,14 @@ class InstallerView {
         var files = evt.dataTransfer.files;
         for (var i = 0; i < files.length; i++)
             host.setFile(files[i]);
+    }
+
+    private handleUninstall(evt:Event) {
+        if (!window.confirm("アンインストールしてよろしいですか？ セーブデータも削除されます。"))
+            return;
+        host.uninstall();
+        $('.installed').classList.add('hidden');
+        $('.uninstalling').classList.remove('hidden');
     }
 }
 
