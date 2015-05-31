@@ -88,26 +88,36 @@ class XSystem35 {
 class AudioPlayer {
     private elem:HTMLAudioElement;
     private currentTrack:number;
+    private volume:number;
+    private muted:boolean;
 
-    constructor(private bgmDir:string) {}
+    constructor(private bgmDir:string) {
+        this.volume = 1;
+        this.muted = false;
+    }
 
     play(track:number, loop:number) {
         if (this.elem)
           this.stop();
 
-        this.elem = document.createElement('audio');
-        this.elem.setAttribute('src', this.bgmDir + 'track' + track + '.wav');
-        this.elem.setAttribute('controls', 'true');
-        document.getElementById('contents').appendChild(this.elem);
+        var audio = document.createElement('audio');
+        audio.setAttribute('src', this.bgmDir + 'track' + track + '.wav');
+        audio.setAttribute('controls', 'true');
+        audio.volume = this.volume;
+        audio.muted = this.muted;
+        audio.loop = (loop != 0);
+        document.getElementById('contents').appendChild(audio);
+        audio.load();
+        audio.play();
+        this.elem = audio;
         this.currentTrack = track;
-        this.elem.load();
-        this.elem.loop = (loop != 0);
-        this.elem.play();
     }
 
     stop() {
         if (this.elem) {
             this.elem.pause();
+            this.volume = this.elem.volume;
+            this.muted = this.elem.muted;
             this.elem.parentNode.removeChild(this.elem);
             this.elem = null;
             this.currentTrack = 0;
