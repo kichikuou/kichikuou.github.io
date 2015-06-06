@@ -284,6 +284,12 @@ function uninstall() {
     }
     postMessage({ command: 'uninstalled' });
 }
+function installFont(data) {
+    self.webkitRequestFileSystemSync(self.PERSISTENT, 0)
+        .root.getDirectory('fonts', { create: true })
+        .getFile(data.name, { create: true })
+        .createWriter().write(data.blob);
+}
 var installer = new Installer();
 function onMessage(evt) {
     switch (evt.data.command) {
@@ -297,6 +303,9 @@ function onMessage(evt) {
             break;
         case 'uninstall':
             uninstall();
+            break;
+        case 'setFont':
+            installFont(evt.data);
             break;
     }
 }

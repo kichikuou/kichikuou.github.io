@@ -17,10 +17,17 @@ var InstallerHost = (function () {
         navigator.webkitPersistentStorage.requestQuota(650 * 1024 * 1024, function () {
             _this.send({ command: 'install' });
             view.setProgress(0, 1);
+            _this.installFonts();
         });
     };
     InstallerHost.prototype.uninstall = function () {
         this.send({ command: 'uninstall' });
+    };
+    InstallerHost.prototype.installFonts = function () {
+        var _this = this;
+        window.fetch('xsystem35/fonts/MTLc3m.ttf')
+            .then(function (res) { return res.blob(); })
+            .then(function (blob) { return _this.send({ command: 'setFont', name: 'MTLc3m.ttf', blob: blob }); });
     };
     InstallerHost.prototype.send = function (msg) {
         this.worker.postMessage(msg);

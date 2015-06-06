@@ -21,11 +21,18 @@ class InstallerHost {
         (<any>navigator).webkitPersistentStorage.requestQuota(650*1024*1024, ()=>{
             this.send({command:'install'});
             view.setProgress(0, 1);
+            this.installFonts();
         }); // TODO: add error handler
     }
 
     uninstall() {
         this.send({command:'uninstall'});
+    }
+
+    installFonts() {
+        window.fetch('xsystem35/fonts/MTLc3m.ttf')
+            .then(res => res.blob())
+            .then(blob => this.send({command:'setFont', name:'MTLc3m.ttf', blob:blob}));
     }
 
     private send(msg:any) {
