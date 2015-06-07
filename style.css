@@ -68,6 +68,17 @@
     padding: 20px 0;
 }
 
+.bgblack-fade {
+    background-color: black;
+    transition-property: background-color;
+    transition-duration: 1s;
+    transition-timing-function: linear;
+}
+
+.status {
+    color: #999999;
+}
+
 #contents {
     margin: 0 auto;
     width: 640px;

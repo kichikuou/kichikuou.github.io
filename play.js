@@ -12,6 +12,7 @@ var XSystem35 = (function () {
             return;
         }
         $('#contents').classList.remove('hidden');
+        document.body.classList.add('bgblack-fade');
         var listener = $('#contents');
         listener.addEventListener('load', this.moduleDidLoad.bind(this), true);
         listener.addEventListener('message', this.handleMessage.bind(this), true);
