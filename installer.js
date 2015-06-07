@@ -17,7 +17,7 @@ var InstallerHost = (function () {
         navigator.webkitPersistentStorage.requestQuota(650 * 1024 * 1024, function () {
             _this.send({ command: 'install' });
             view.setProgress(0, 1);
-            _this.installFonts().then(function () { return show($('#preload')); });
+            _this.installFonts();
         });
     };
     InstallerHost.prototype.uninstall = function () {

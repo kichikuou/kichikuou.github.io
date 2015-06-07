@@ -21,7 +21,7 @@ class InstallerHost {
         (<any>navigator).webkitPersistentStorage.requestQuota(650*1024*1024, ()=>{
             this.send({command:'install'});
             view.setProgress(0, 1);
-            this.installFonts().then(() => show($('#preload')));
+            this.installFonts();
         }); // TODO: add error handler
     }
 
