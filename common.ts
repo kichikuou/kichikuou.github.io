@@ -1,4 +1,4 @@
-var $: (selector:string)=>Element = document.querySelector.bind(document);
+var $: (selector:string)=>HTMLElement = document.querySelector.bind(document);
 
 function requestFileSystem(): Promise<FileSystem> {
     return new Promise(function(resolve, reject) {

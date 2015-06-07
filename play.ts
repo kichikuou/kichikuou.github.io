@@ -1,4 +1,4 @@
-interface PNaClElement extends Element {
+interface PNaClElement extends HTMLElement {
     lastError: string;
     exitStatus: number;
     postMessage: (message:any)=>void;
@@ -7,6 +7,8 @@ interface PNaClElement extends Element {
 class XSystem35 {
     private naclModule:PNaClElement;
     private audio:AudioPlayer;
+    private naclWidth:number;
+    private naclHeight:number;
 
     constructor() {
         isInstalled().then(this.init.bind(this),
@@ -28,7 +30,11 @@ class XSystem35 {
         listener.addEventListener('message', this.handleMessage.bind(this), true);
         listener.addEventListener('error', this.handleError.bind(this), true);
         listener.addEventListener('crash', this.handleCrash.bind(this), true);
+        $('#zoom').addEventListener('change', this.handleZoom.bind(this));
+
         this.naclModule = <PNaClElement>$('#nacl_module');
+        this.naclWidth = Number(this.naclModule.getAttribute('width'));
+        this.naclHeight = Number(this.naclModule.getAttribute('height'));
 
         requestFileSystem().then(
             (fs) => this.audio = new AudioPlayer(fs.root.toURL()));
@@ -36,6 +42,7 @@ class XSystem35 {
 
     private moduleDidLoad() {
         this.updateStatus('　');
+        this.initZoom();
     }
 
     private handleMessage(message:any) {
@@ -67,9 +74,28 @@ class XSystem35 {
             this.updateStatus('EXITED: ' + this.naclModule.exitStatus);
     }
 
+    private handleZoom() {
+        var ratio = Number((<HTMLInputElement>$('#zoom')).value) / 100;
+        $('#contents').style.width = (640 * ratio) + 'px';
+        this.naclModule.setAttribute('width', String(this.naclWidth * ratio));
+        this.naclModule.setAttribute('height', String(this.naclHeight * ratio));
+        localStorage.setItem('zoom', String(ratio));
+    }
+
+    private initZoom() {
+        var zoomElement:HTMLInputElement = <HTMLInputElement>$('#zoom');
+        zoomElement.classList.remove('hidden');
+        var ratio = Number(localStorage.getItem('zoom') || 1.0);
+        if (ratio != 1.0) {
+            zoomElement.value = String(ratio * 100);
+            this.handleZoom();
+        }
+    }
+
     private setWindowSize(width:number, height:number) {
-        this.naclModule.setAttribute('width', width + '');
-        this.naclModule.setAttribute('height', height + '');
+        this.naclWidth = width;
+        this.naclHeight = height;
+        this.handleZoom();
     }
 
     private reply(data:any, value:any) {
