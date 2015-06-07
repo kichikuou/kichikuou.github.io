@@ -71,7 +71,7 @@ var XSystem35 = (function () {
 var AudioPlayer = (function () {
     function AudioPlayer(bgmDir) {
         this.bgmDir = bgmDir;
-        this.volume = 1;
+        this.volume = Number(localStorage.getItem('volume') || 1);
         this.muted = false;
     }
     AudioPlayer.prototype.play = function (track, loop) {
@@ -97,6 +97,7 @@ var AudioPlayer = (function () {
             this.elem.parentNode.removeChild(this.elem);
             this.elem = null;
             this.currentTrack = 0;
+            localStorage.setItem('volume', this.volume + '');
         }
     };
     AudioPlayer.prototype.getPosition = function () {

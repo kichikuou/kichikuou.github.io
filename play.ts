@@ -90,7 +90,7 @@ class AudioPlayer {
     private muted:boolean;
 
     constructor(private bgmDir:string) {
-        this.volume = 1;
+        this.volume = Number(localStorage.getItem('volume') || 1);
         this.muted = false;
     }
 
@@ -119,6 +119,7 @@ class AudioPlayer {
             this.elem.parentNode.removeChild(this.elem);
             this.elem = null;
             this.currentTrack = 0;
+            localStorage.setItem('volume', this.volume + '');
         }
     }
 
