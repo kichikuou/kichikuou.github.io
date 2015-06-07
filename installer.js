@@ -77,9 +77,7 @@ var InstallerView = (function () {
                 _this.setState('installed');
             else
                 _this.setState('files');
-        }, function () {
-            this.setState('unsupported');
-        });
+        }, function () { return _this.setState('unsupported'); });
     }
     InstallerView.prototype.setReadyState = function (imgReady, cueReady) {
         if (imgReady)

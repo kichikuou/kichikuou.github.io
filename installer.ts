@@ -90,9 +90,7 @@ class InstallerView {
                 this.setState('installed');
             else
                 this.setState('files');
-        }, function() {
-            this.setState('unsupported');
-        });
+        }, () => this.setState('unsupported'));
     }
 
     setReadyState(imgReady:boolean, cueReady:boolean) {
