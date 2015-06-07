@@ -3,13 +3,13 @@
     color: white;
 }
 
-.pure-menu-heading {
+.pure-menu-heading, .pure-menu-heading:visited {
     text-transform: none;
     font-weight: bold;
     color: white;
 }
 
-.navbar .pure-menu-selected a {
+.navbar .pure-menu-selected a, .navbar .pure-menu-selected a:visited {
     color: white;
 }
 .navbar a {
