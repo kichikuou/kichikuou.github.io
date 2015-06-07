@@ -21,7 +21,7 @@ class InstallerHost {
         (<any>navigator).webkitPersistentStorage.requestQuota(650*1024*1024, ()=>{
             this.send({command:'install'});
             view.setProgress(0, 1);
-            this.installFonts();
+            this.installFonts().then(() => show($('#preload')));
         }); // TODO: add error handler
     }
 
@@ -29,8 +29,8 @@ class InstallerHost {
         this.send({command:'uninstall'});
     }
 
-    installFonts() {
-        window.fetch('xsystem35/fonts/MTLc3m.ttf')
+    installFonts(): Promise<any> {
+        return window.fetch('xsystem35/fonts/MTLc3m.ttf')
             .then(res => res.blob())
             .then(blob => this.send({command:'setFont', name:'MTLc3m.ttf', blob:blob}));
     }
@@ -76,6 +76,8 @@ class InstallerHost {
 }
 
 class InstallerView {
+    private state:HTMLElement;
+
     constructor() {
         $('#fileselect').addEventListener('change', this.handleFileSelect.bind(this), false);
         document.body.ondragover = this.handleDragOver.bind(this);
@@ -83,13 +85,13 @@ class InstallerView {
         $('#uninstall').addEventListener('click', this.handleUninstall.bind(this));
         window.onbeforeunload = this.handleBeforeunload.bind(this);
 
-        isInstalled().then(function(installed) {
+        isInstalled().then((installed) => {
             if (installed)
-                $('.installed').classList.remove('hidden');
+                this.setState('installed');
             else
-                $('.files').classList.remove('hidden');
+                this.setState('files');
         }, function() {
-            $('.unsupported').classList.remove('hidden');
+            this.setState('unsupported');
         });
     }
 
@@ -101,20 +103,27 @@ class InstallerView {
     }
 
     setProgress(value:number, max:number) {
-        $('.files').classList.add('hidden');
-        $('.progress').classList.remove('hidden');
+        this.setState('progress');
         (<HTMLProgressElement>$('#progressBar')).max = max;
         (<HTMLProgressElement>$('#progressBar')).value = value;
     }
 
     onComplete() {
-        $('.progress').classList.add('hidden');
-        $('.installed').classList.remove('hidden');
+        this.setState('installed');
     }
 
     onUninstallComplete() {
-        $('.uninstalling').classList.add('hidden');
-        $('.uninstalled').classList.remove('hidden');
+        this.setState('uninstalled');
+    }
+
+    private setState(state:string) {
+        var newState = $('.' + state);
+        if (this.state !== newState) {
+            if (this.state)
+                hide(this.state);
+            show(newState);
+            this.state = newState;
+        }
     }
 
     private handleBeforeunload():any {
@@ -148,8 +157,7 @@ class InstallerView {
         if (!window.confirm("アンインストールしてよろしいですか？ セーブデータも削除されます。"))
             return;
         host.uninstall();
-        $('.installed').classList.add('hidden');
-        $('.uninstalling').classList.remove('hidden');
+        this.setState('uninstalling');
     }
 }
 

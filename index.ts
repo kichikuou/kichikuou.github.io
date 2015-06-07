@@ -1,8 +1,8 @@
 isInstalled().then(function(installed) {
     if (installed)
-        $('.installed').classList.remove('hidden');
+        show($('.installed'));
     else
-        $('.notinstalled').classList.remove('hidden');
+        show($('.notinstalled'));
 }, function() {
-    $('.unsupported').classList.remove('hidden');
+    show($('.unsupported'));
 });

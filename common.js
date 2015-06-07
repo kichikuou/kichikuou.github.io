@@ -1,4 +1,10 @@
 var $ = document.querySelector.bind(document);
+function show(elem) {
+    elem.classList.remove('hidden');
+}
+function hide(elem) {
+    elem.classList.add('hidden');
+}
 function requestFileSystem() {
     return new Promise(function (resolve, reject) {
         if (!window.webkitRequestFileSystem)

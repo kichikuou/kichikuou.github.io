@@ -1,6 +1,6 @@
 var XSystem35 = (function () {
     function XSystem35() {
-        isInstalled().then(this.init.bind(this), function () { return $('.unsupported').classList.remove('hidden'); });
+        isInstalled().then(this.init.bind(this), function () { return show($('.unsupported')); });
     }
     XSystem35.prototype.postMessage = function (message) {
         this.naclModule.postMessage(message);
@@ -8,10 +8,10 @@ var XSystem35 = (function () {
     XSystem35.prototype.init = function (installed) {
         var _this = this;
         if (!installed) {
-            $('.notInstalled').classList.remove('hidden');
+            show($('.notInstalled'));
             return;
         }
-        $('#contents').classList.remove('hidden');
+        show($('#contents'));
         document.body.classList.add('bgblack-fade');
         var listener = $('#contents');
         listener.addEventListener('load', this.moduleDidLoad.bind(this), true);
@@ -68,7 +68,7 @@ var XSystem35 = (function () {
     };
     XSystem35.prototype.initZoom = function () {
         var zoomElement = $('#zoom');
-        zoomElement.classList.remove('hidden');
+        show(zoomElement);
         var ratio = Number(localStorage.getItem('zoom') || 1.0);
         if (ratio != 1.0) {
             zoomElement.value = String(ratio * 100);

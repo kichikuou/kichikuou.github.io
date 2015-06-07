@@ -1,5 +1,13 @@
 var $: (selector:string)=>HTMLElement = document.querySelector.bind(document);
 
+function show(elem:HTMLElement) {
+    elem.classList.remove('hidden');
+}
+
+function hide(elem:HTMLElement) {
+    elem.classList.add('hidden');
+}
+
 function requestFileSystem(): Promise<FileSystem> {
     return new Promise(function(resolve, reject) {
         if (!window.webkitRequestFileSystem)

@@ -11,8 +11,7 @@ class XSystem35 {
     private naclHeight:number;
 
     constructor() {
-        isInstalled().then(this.init.bind(this),
-            () => $('.unsupported').classList.remove('hidden'));
+        isInstalled().then(this.init.bind(this), () => show($('.unsupported')));
     }
 
     postMessage(message:any) {
@@ -21,10 +20,10 @@ class XSystem35 {
 
     private init(installed:boolean) {
         if (!installed) {
-            $('.notInstalled').classList.remove('hidden');
+            show($('.notInstalled'));
             return;
         }
-        $('#contents').classList.remove('hidden');
+        show($('#contents'));
         document.body.classList.add('bgblack-fade');
         var listener = $('#contents');
         listener.addEventListener('load', this.moduleDidLoad.bind(this), true);
@@ -85,7 +84,7 @@ class XSystem35 {
 
     private initZoom() {
         var zoomElement:HTMLInputElement = <HTMLInputElement>$('#zoom');
-        zoomElement.classList.remove('hidden');
+        show(zoomElement);
         var ratio = Number(localStorage.getItem('zoom') || 1.0);
         if (ratio != 1.0) {
             zoomElement.value = String(ratio * 100);
