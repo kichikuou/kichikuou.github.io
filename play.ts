@@ -12,6 +12,17 @@ class XSystem35 {
 
     constructor() {
         isInstalled().then(this.init.bind(this), () => show($('.unsupported')));
+
+        this.naclModule = <PNaClElement>$('#nacl_module');
+        this.naclWidth = Number(this.naclModule.getAttribute('width'));
+        this.naclHeight = Number(this.naclModule.getAttribute('height'));
+        if (window.location.search.length > 1) {
+            for (var pair of window.location.search.substr(1).split('&')) {
+                var keyValue = pair.split('=');
+                if (keyValue[0] == 'debuglv')
+                    this.naclModule.setAttribute('ARG2', keyValue[1]);
+            }
+        }
     }
 
     postMessage(message:any) {
@@ -31,10 +42,6 @@ class XSystem35 {
         listener.addEventListener('error', this.handleError.bind(this), true);
         listener.addEventListener('crash', this.handleCrash.bind(this), true);
         $('#zoom').addEventListener('change', this.handleZoom.bind(this));
-
-        this.naclModule = <PNaClElement>$('#nacl_module');
-        this.naclWidth = Number(this.naclModule.getAttribute('width'));
-        this.naclHeight = Number(this.naclModule.getAttribute('height'));
 
         requestFileSystem().then(
             (fs) => this.audio = new AudioPlayer(fs.root.toURL()));

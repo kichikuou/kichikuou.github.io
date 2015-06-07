@@ -1,6 +1,17 @@
 var XSystem35 = (function () {
     function XSystem35() {
         isInstalled().then(this.init.bind(this), function () { return show($('.unsupported')); });
+        this.naclModule = $('#nacl_module');
+        this.naclWidth = Number(this.naclModule.getAttribute('width'));
+        this.naclHeight = Number(this.naclModule.getAttribute('height'));
+        if (window.location.search.length > 1) {
+            for (var _i = 0, _a = window.location.search.substr(1).split('&'); _i < _a.length; _i++) {
+                var pair = _a[_i];
+                var keyValue = pair.split('=');
+                if (keyValue[0] == 'debuglv')
+                    this.naclModule.setAttribute('ARG2', keyValue[1]);
+            }
+        }
     }
     XSystem35.prototype.postMessage = function (message) {
         this.naclModule.postMessage(message);
@@ -19,9 +30,6 @@ var XSystem35 = (function () {
         listener.addEventListener('error', this.handleError.bind(this), true);
         listener.addEventListener('crash', this.handleCrash.bind(this), true);
         $('#zoom').addEventListener('change', this.handleZoom.bind(this));
-        this.naclModule = $('#nacl_module');
-        this.naclWidth = Number(this.naclModule.getAttribute('width'));
-        this.naclHeight = Number(this.naclModule.getAttribute('height'));
         requestFileSystem().then(function (fs) { return _this.audio = new AudioPlayer(fs.root.toURL()); });
     };
     XSystem35.prototype.moduleDidLoad = function () {
