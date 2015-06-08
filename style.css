@@ -1,3 +1,7 @@
+body {
+    font-size: 15px;
+}
+
 .navbar {
     background: #464646;
     color: white;
@@ -29,6 +33,11 @@
 .contents {
     width: 640px;
     margin: 4ex auto 0;
+}
+
+.social-buttons {
+    margin: 1em 0;
+    float: right;
 }
 
 .instructions {
