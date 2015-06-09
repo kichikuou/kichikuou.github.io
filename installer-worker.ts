@@ -223,8 +223,6 @@ class Installer {
             this.imgFile = file;
         else if (file.name.toLowerCase().endsWith('.cue'))
             this.cdda = new CDDA(file);
-        else
-            throw 'Unknown file type';
     }
 
     ready(): boolean {

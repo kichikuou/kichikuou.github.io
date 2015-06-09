@@ -228,8 +228,6 @@ var Installer = (function () {
             this.imgFile = file;
         else if (file.name.toLowerCase().endsWith('.cue'))
             this.cdda = new CDDA(file);
-        else
-            throw 'Unknown file type';
     };
     Installer.prototype.ready = function () {
         return this.imgFile && this.cdda && true;
