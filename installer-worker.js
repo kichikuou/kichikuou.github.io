@@ -96,7 +96,7 @@ var DirEnt = (function () {
         get: function () {
             var len = this.view.getUint8(32);
             var decoder = new TextDecoder('shift_jis');
-            return decoder.decode(new DataView(this.buf, this.offset + 33, len));
+            return decoder.decode(new DataView(this.buf, this.offset + 33, len)).split(';')[0];
         },
         enumerable: true,
         configurable: true
