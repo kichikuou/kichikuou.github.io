@@ -248,7 +248,6 @@ class Installer {
             }
             postMessage({command:'progress', value:track, max:this.cdda.maxTrack()});
         }
-        localfs.root.getDirectory('save', {create:true});
         postMessage({command:'complete'});
     }
 
@@ -281,10 +280,12 @@ function uninstall() {
 }
 
 function installFont(data:any) {
-    self.webkitRequestFileSystemSync(self.PERSISTENT, 0)
-        .root.getDirectory('fonts', {create:true})
-        .getFile(data.name, {create:true})
-        .createWriter().write(data.blob);
+    var fs = self.webkitRequestFileSystemSync(self.PERSISTENT, 0);
+    fs.root.getDirectory('fonts', {create:true})
+      .getFile(data.name, {create:true})
+      .createWriter().write(data.blob);
+    fs.root.getDirectory('save', {create:true});
+    postMessage({command:'setFontDone'});
 }
 
 var installer = new Installer();

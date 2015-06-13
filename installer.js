@@ -1,6 +1,7 @@
 var InstallerHost = (function () {
     function InstallerHost() {
         this.files = [];
+        this.fontErrorCount = 0;
         this.initWorker();
     }
     InstallerHost.prototype.initWorker = function () {
@@ -17,22 +18,34 @@ var InstallerHost = (function () {
         navigator.webkitPersistentStorage.requestQuota(650 * 1024 * 1024, function () {
             _this.send({ command: 'install' });
             view.setProgress(0, 1);
-            _this.installFonts();
+            if (!_this.fontBlob)
+                _this.fontBlob = _this.fetchFont();
         });
     };
     InstallerHost.prototype.uninstall = function () {
         this.send({ command: 'uninstall' });
     };
-    InstallerHost.prototype.installFonts = function () {
+    InstallerHost.prototype.fetchFont = function () {
         var _this = this;
         return window.fetch('xsystem35/fonts/MTLc3m.ttf')
-            .then(function (res) { return res.blob(); })
-            .then(function (blob) { return _this.send({ command: 'setFont', name: 'MTLc3m.ttf', blob: blob }); });
+            .then(function (resp) {
+            if (resp.status == 200)
+                return resp.blob();
+            else
+                throw 'fetchFont: ' + resp.status + ' ' + resp.statusText;
+        }).catch(function (err) {
+            console.log(err);
+            if (++_this.fontErrorCount < 3)
+                return _this.fetchFont();
+            else
+                throw err;
+        });
     };
     InstallerHost.prototype.send = function (msg) {
         this.worker.postMessage(msg);
     };
     InstallerHost.prototype.onMessage = function (evt) {
+        var _this = this;
         switch (evt.data.command) {
             case 'readyState':
                 view.setReadyState(evt.data.imgReady, evt.data.cueReady);
@@ -43,6 +56,9 @@ var InstallerHost = (function () {
                 view.setProgress(evt.data.value, evt.data.max);
                 break;
             case 'complete':
+                this.fontBlob.then(function (blob) { return _this.send({ command: 'setFont', name: 'MTLc3m.ttf', blob: blob }); });
+                break;
+            case 'setFontDone':
                 view.onComplete();
                 break;
             case 'uninstalled':

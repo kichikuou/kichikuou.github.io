@@ -1,6 +1,8 @@
 class InstallerHost {
     private worker: Worker;
     private files: File[] = [];
+    private fontBlob: Promise<Blob>;
+    private fontErrorCount = 0;
 
     constructor() {
         this.initWorker();
@@ -21,7 +23,8 @@ class InstallerHost {
         (<any>navigator).webkitPersistentStorage.requestQuota(650*1024*1024, ()=>{
             this.send({command:'install'});
             view.setProgress(0, 1);
-            this.installFonts();
+            if (!this.fontBlob)
+                this.fontBlob = this.fetchFont();
         }); // TODO: add error handler
     }
 
@@ -29,10 +32,20 @@ class InstallerHost {
         this.send({command:'uninstall'});
     }
 
-    installFonts(): Promise<any> {
+    fetchFont(): Promise<Blob> {
         return window.fetch('xsystem35/fonts/MTLc3m.ttf')
-            .then(res => res.blob())
-            .then(blob => this.send({command:'setFont', name:'MTLc3m.ttf', blob:blob}));
+            .then(resp => {
+                if (resp.status == 200)
+                    return resp.blob();
+                else
+                    throw 'fetchFont: ' + resp.status + ' ' + resp.statusText;
+            }).catch((err) => {
+                console.log(err);
+                if (++this.fontErrorCount < 3)
+                    return this.fetchFont();
+                else
+                    throw err;
+            });
     }
 
     private send(msg:any) {
@@ -50,6 +63,9 @@ class InstallerHost {
             view.setProgress(evt.data.value, evt.data.max);
             break;
         case 'complete':
+            this.fontBlob.then(blob => this.send({command:'setFont', name:'MTLc3m.ttf', blob:blob}));
+            break;
+        case 'setFontDone':
             view.onComplete();
             break;
         case 'uninstalled':
