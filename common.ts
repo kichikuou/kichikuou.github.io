@@ -17,6 +17,8 @@ function requestFileSystem(): Promise<FileSystem> {
 }
 
 function isInstalled(): Promise<boolean> {
+    if (!navigator.mimeTypes['application/x-pnacl'] || !window.fetch)
+        return <Promise<any>>(Promise.reject('not supported'));
     return requestFileSystem().then(function(fs) {
         return new Promise(function(resolve) {
             fs.root.getDirectory('save', {}, () => resolve(true), () => resolve(false));

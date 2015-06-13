@@ -13,6 +13,8 @@ function requestFileSystem() {
     });
 }
 function isInstalled() {
+    if (!navigator.mimeTypes['application/x-pnacl'] || !window.fetch)
+        return (Promise.reject('not supported'));
     return requestFileSystem().then(function (fs) {
         return new Promise(function (resolve) {
             fs.root.getDirectory('save', {}, function () { return resolve(true); }, function () { return resolve(false); });
