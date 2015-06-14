@@ -107,3 +107,7 @@ body {
     border: none;
     box-shadow: none;
 }
+
+#uploadResult {
+    color: red;
+}

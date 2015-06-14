@@ -12,23 +12,17 @@
     <ul class="pure-menu-list">
       <li class="pure-menu-item"><a href="/" class="pure-menu-link">ホーム</a></li>
       <li class="pure-menu-item"><a href="install.html" class="pure-menu-link">インストール</a></li>
-      <li class="pure-menu-item pure-menu-selected"><a href="#" class="pure-menu-link">ゲーム</a></li>
-      <li class="pure-menu-item"><a href="tools.html" class="pure-menu-link">ツール</a></li>
+      <li class="pure-menu-item"><a href="play.html" class="pure-menu-link">ゲーム</a></li>
+      <li class="pure-menu-item pure-menu-selected"><a href="#" class="pure-menu-link">ツール</a></li>
     </ul>
   </div>
 
-  <div id="contents" class="hidden">
-    <div class="status">Loading...</div>
-    <embed id="nacl_module" width=640 height=480 src="xsystem35/xsystem35.nmf" ARG1="-debuglv" ARG2="1" type="application/x-pnacl"></embed>
-    <form class="pure-form">
-      <select id="zoom" class="hidden">
-        <option value=100>100%</option>
-        <option value=125>125%</option>
-        <option value=150>150%</option>
-        <option value=200>200%</option>
-        <option value=300>300%</option>
-      </select>
-    </form>
+  <div class="contents saveDataManager hidden">
+    <h2>セーブデータ</h2>
+    <p>セーブデータを ZIP ファイルとしてダウンロードしたり、アップロードして復元できます。</p>
+    <button id="downloadSaveData" class="pure-button" disabled>ダウンロード</button>
+    <button id="uploadSaveData" class="pure-button">アップロード</button>
+    <span id="uploadResult"></span>
   </div>
 
   <div class="contents notInstalled hidden">
@@ -36,7 +30,7 @@
   </div>
 
   <div class="contents unsupported hidden">
-    このブラウザでは利用できません。PC版 Google Chrome 42以降が必要です。
+    このブラウザでは利用できません。PC版 Google Chrome 42 以降が必要です。
   </div>
 
   <script>
@@ -49,6 +43,6 @@
     ga('send', 'pageview');
   </script>
   <script src="common.js"></script>
-  <script src="play.js"></script>
+  <script src="tools.js"></script>
 </body>
 </html>
