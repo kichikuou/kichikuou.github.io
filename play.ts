@@ -50,6 +50,7 @@ class XSystem35 {
     private moduleDidLoad() {
         this.updateStatus('　');
         this.initZoom();
+        setupTouchHandlers(this.naclModule);
     }
 
     private handleMessage(message:any) {
@@ -113,6 +114,84 @@ class XSystem35 {
 
     private updateStatus(status:string) {
         $('#contents .status').textContent = status;
+    }
+}
+
+enum TouchState {Up, Down, Left, Right, Tap};
+
+function setupTouchHandlers(element:HTMLElement) {
+    var touchState = TouchState.Up;
+    var touchTimer:number;
+
+    element.addEventListener('touchstart', onTouchStart);
+    element.addEventListener('touchmove', onTouchMove);
+    element.addEventListener('touchend', onTouchEnd);
+
+    function onTouchStart(event:TouchEvent) {
+        if (event.touches.length != 1)
+            return;
+        event.preventDefault();
+        var touch = event.touches[0];
+        generateMouseEvent('mousemove', 0, touch);
+        switch (touchState) {
+        case TouchState.Tap:
+            clearTimeout(touchTimer);
+            // fallthrough
+        case TouchState.Up:
+            touchState = TouchState.Down;
+            touchTimer = setTimeout(() => {
+                generateMouseEvent('mousedown', 2, touch);
+                touchState = TouchState.Right;
+            }, 600);
+            break;
+        }
+    }
+
+    function onTouchMove(event:TouchEvent) {
+        if (event.touches.length != 1)
+            return;
+        event.preventDefault();
+        var touch = event.touches[0];
+        if (touchState === TouchState.Down) {
+            clearTimeout(touchTimer);
+            generateMouseEvent('mousedown', 0, touch);
+            touchState = TouchState.Left;
+        }
+        generateMouseEvent('mousemove', 0, touch);
+    }
+
+    function onTouchEnd(event:TouchEvent) {
+        if (event.changedTouches.length != 1)
+            return;
+        event.preventDefault();
+        var touch = event.changedTouches[0];
+        switch (touchState) {
+        case TouchState.Down:
+            clearTimeout(touchTimer);
+            generateMouseEvent('mousedown', 0, touch);
+            touchState = TouchState.Tap;
+            touchTimer = setTimeout(() => {
+                generateMouseEvent('mouseup', 0, touch);
+                touchState = TouchState.Up;
+            }, 20);
+            break;
+        case TouchState.Left:
+            generateMouseEvent('mouseup', 0, touch);
+            touchState = TouchState.Up;
+            break;
+        case TouchState.Right:
+            generateMouseEvent('mouseup', 2, touch);
+            touchState = TouchState.Up;
+            break;
+        }
+    }
+
+    function generateMouseEvent(type:string, button:number, t:Touch) {
+        var mouseEvent = document.createEvent('MouseEvents');
+        mouseEvent.initMouseEvent(type, true, true, window, 0,
+                                  t.screenX, t.screenY, t.clientX, t.clientY,
+                                  false, false, false, false, button, null);
+        element.dispatchEvent(mouseEvent);
     }
 }
 

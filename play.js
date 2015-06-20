@@ -35,6 +35,7 @@ var XSystem35 = (function () {
     XSystem35.prototype.moduleDidLoad = function () {
         this.updateStatus('　');
         this.initZoom();
+        setupTouchHandlers(this.naclModule);
     };
     XSystem35.prototype.handleMessage = function (message) {
         var data = message.data;
@@ -98,6 +99,82 @@ var XSystem35 = (function () {
     };
     return XSystem35;
 })();
+var TouchState;
+(function (TouchState) {
+    TouchState[TouchState["Up"] = 0] = "Up";
+    TouchState[TouchState["Down"] = 1] = "Down";
+    TouchState[TouchState["Left"] = 2] = "Left";
+    TouchState[TouchState["Right"] = 3] = "Right";
+    TouchState[TouchState["Tap"] = 4] = "Tap";
+})(TouchState || (TouchState = {}));
+;
+function setupTouchHandlers(element) {
+    var touchState = TouchState.Up;
+    var touchTimer;
+    element.addEventListener('touchstart', onTouchStart);
+    element.addEventListener('touchmove', onTouchMove);
+    element.addEventListener('touchend', onTouchEnd);
+    function onTouchStart(event) {
+        if (event.touches.length != 1)
+            return;
+        event.preventDefault();
+        var touch = event.touches[0];
+        generateMouseEvent('mousemove', 0, touch);
+        switch (touchState) {
+            case TouchState.Tap:
+                clearTimeout(touchTimer);
+            case TouchState.Up:
+                touchState = TouchState.Down;
+                touchTimer = setTimeout(function () {
+                    generateMouseEvent('mousedown', 2, touch);
+                    touchState = TouchState.Right;
+                }, 600);
+                break;
+        }
+    }
+    function onTouchMove(event) {
+        if (event.touches.length != 1)
+            return;
+        event.preventDefault();
+        var touch = event.touches[0];
+        if (touchState === TouchState.Down) {
+            clearTimeout(touchTimer);
+            generateMouseEvent('mousedown', 0, touch);
+            touchState = TouchState.Left;
+        }
+        generateMouseEvent('mousemove', 0, touch);
+    }
+    function onTouchEnd(event) {
+        if (event.changedTouches.length != 1)
+            return;
+        event.preventDefault();
+        var touch = event.changedTouches[0];
+        switch (touchState) {
+            case TouchState.Down:
+                clearTimeout(touchTimer);
+                generateMouseEvent('mousedown', 0, touch);
+                touchState = TouchState.Tap;
+                touchTimer = setTimeout(function () {
+                    generateMouseEvent('mouseup', 0, touch);
+                    touchState = TouchState.Up;
+                }, 20);
+                break;
+            case TouchState.Left:
+                generateMouseEvent('mouseup', 0, touch);
+                touchState = TouchState.Up;
+                break;
+            case TouchState.Right:
+                generateMouseEvent('mouseup', 2, touch);
+                touchState = TouchState.Up;
+                break;
+        }
+    }
+    function generateMouseEvent(type, button, t) {
+        var mouseEvent = document.createEvent('MouseEvents');
+        mouseEvent.initMouseEvent(type, true, true, window, 0, t.screenX, t.screenY, t.clientX, t.clientY, false, false, false, false, button, null);
+        element.dispatchEvent(mouseEvent);
+    }
+}
 var AudioPlayer = (function () {
     function AudioPlayer(bgmDir) {
         this.bgmDir = bgmDir;
