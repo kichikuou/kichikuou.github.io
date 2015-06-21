@@ -2,8 +2,7 @@ var XSystem35 = (function () {
     function XSystem35() {
         isInstalled().then(this.init.bind(this), function () { return show($('.unsupported')); });
         this.naclModule = $('#nacl_module');
-        this.naclWidth = Number(this.naclModule.getAttribute('width'));
-        this.naclHeight = Number(this.naclModule.getAttribute('height'));
+        this.zoom = new ZoomManager();
         if (window.location.search.length > 1) {
             for (var _i = 0, _a = window.location.search.substr(1).split('&'); _i < _a.length; _i++) {
                 var pair = _a[_i];
@@ -29,18 +28,17 @@ var XSystem35 = (function () {
         listener.addEventListener('message', this.handleMessage.bind(this), true);
         listener.addEventListener('error', this.handleError.bind(this), true);
         listener.addEventListener('crash', this.handleCrash.bind(this), true);
-        $('#zoom').addEventListener('change', this.handleZoom.bind(this));
         requestFileSystem().then(function (fs) { return _this.audio = new AudioPlayer(fs.root.toURL()); });
     };
     XSystem35.prototype.moduleDidLoad = function () {
         this.updateStatus('　');
-        this.initZoom();
+        this.zoom.init();
         setupTouchHandlers(this.naclModule);
     };
     XSystem35.prototype.handleMessage = function (message) {
         var data = message.data;
         if (data.command == 'set_window_size') {
-            this.setWindowSize(data.width, data.height);
+            this.zoom.setWindowSize(data.width, data.height);
         }
         else if (data.command == 'cd_play') {
             this.audio.play(data.track, data.loop);
@@ -68,27 +66,6 @@ var XSystem35 = (function () {
         else
             this.updateStatus('EXITED: ' + this.naclModule.exitStatus);
     };
-    XSystem35.prototype.handleZoom = function () {
-        var ratio = Number($('#zoom').value) / 100;
-        $('#contents').style.width = (640 * ratio) + 'px';
-        this.naclModule.setAttribute('width', String(this.naclWidth * ratio));
-        this.naclModule.setAttribute('height', String(this.naclHeight * ratio));
-        localStorage.setItem('zoom', String(ratio));
-    };
-    XSystem35.prototype.initZoom = function () {
-        var zoomElement = $('#zoom');
-        show(zoomElement);
-        var ratio = Number(localStorage.getItem('zoom') || 1.0);
-        if (ratio != 1.0) {
-            zoomElement.value = String(ratio * 100);
-            this.handleZoom();
-        }
-    };
-    XSystem35.prototype.setWindowSize = function (width, height) {
-        this.naclWidth = width;
-        this.naclHeight = height;
-        this.handleZoom();
-    };
     XSystem35.prototype.reply = function (data, value) {
         var result = { 'result': value,
             'naclmsg_id': data['naclmsg_id'] };
@@ -98,6 +75,60 @@ var XSystem35 = (function () {
         $('#contents .status').textContent = status;
     };
     return XSystem35;
+})();
+var ZoomManager = (function () {
+    function ZoomManager() {
+        this.nonFullScreenRatio = 1;
+        var naclModule = $('#nacl_module');
+        this.width = Number(naclModule.getAttribute('width'));
+        this.height = Number(naclModule.getAttribute('height'));
+    }
+    ZoomManager.prototype.init = function () {
+        this.zoomSelect = $('#zoom');
+        this.zoomSelect.addEventListener('change', this.handleZoom.bind(this));
+        show(this.zoomSelect);
+        document.addEventListener('webkitfullscreenchange', this.onFullScreenChange.bind(this));
+        var ratio = localStorage.getItem('zoom');
+        if (ratio != 'full' && Number(ratio) < 1 || Number(ratio) > 3)
+            ratio = null;
+        if (ratio && ratio != '1') {
+            this.zoomSelect.value = String(ratio);
+            this.handleZoom();
+        }
+    };
+    ZoomManager.prototype.setWindowSize = function (width, height) {
+        this.width = width;
+        this.height = height;
+        this.handleZoom();
+    };
+    ZoomManager.prototype.onFullScreenChange = function () {
+        if (!document.webkitFullscreenElement)
+            this.zoomSelect.value = String(this.nonFullScreenRatio);
+        this.handleZoom();
+    };
+    ZoomManager.prototype.handleZoom = function () {
+        var naclModule = $('#nacl_module');
+        var value = this.zoomSelect.value;
+        localStorage.setItem('zoom', value);
+        if (value == 'full') {
+            if (!document.webkitFullscreenElement) {
+                naclModule.webkitRequestFullScreen();
+            }
+            else {
+                var ratio = Math.min(window.innerWidth / this.width, window.innerHeight / this.height);
+                naclModule.setAttribute('width', String(this.width * ratio));
+                naclModule.setAttribute('height', String(this.height * ratio));
+            }
+        }
+        else {
+            var ratio = Number(value);
+            $('#contents').style.width = (this.width * ratio) + 'px';
+            naclModule.setAttribute('width', String(this.width * ratio));
+            naclModule.setAttribute('height', String(this.height * ratio));
+            this.nonFullScreenRatio = ratio;
+        }
+    };
+    return ZoomManager;
 })();
 var TouchState;
 (function (TouchState) {
