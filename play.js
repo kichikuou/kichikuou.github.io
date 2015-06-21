@@ -28,33 +28,45 @@ var XSystem35 = (function () {
         listener.addEventListener('message', this.handleMessage.bind(this), true);
         listener.addEventListener('error', this.handleError.bind(this), true);
         listener.addEventListener('crash', this.handleCrash.bind(this), true);
+        setupTouchHandlers(this.naclModule);
         requestFileSystem().then(function (fs) { return _this.audio = new AudioPlayer(fs.root.toURL()); });
     };
     XSystem35.prototype.moduleDidLoad = function () {
         this.updateStatus('　');
         this.zoom.init();
-        setupTouchHandlers(this.naclModule);
     };
     XSystem35.prototype.handleMessage = function (message) {
         var data = message.data;
-        if (data.command == 'set_window_size') {
-            this.zoom.setWindowSize(data.width, data.height);
-        }
-        else if (data.command == 'cd_play') {
-            this.audio.play(data.track, data.loop);
-        }
-        else if (data.command == 'cd_stop') {
-            this.audio.stop();
-        }
-        else if (data.command == 'cd_getposition') {
-            this.reply(data, this.audio.getPosition());
-        }
-        else if (typeof data === 'string') {
-            console.log(data);
-        }
-        else {
-            console.log('unknown message');
-            console.log(message);
+        switch (data.command) {
+            case 'exit':
+                console.log('exit code: ' + data.code);
+                hide($('#contents'));
+                setTimeout(function () { return show($('#contents')); }, 3000);
+                break;
+            case 'set_window_size':
+                this.zoom.setWindowSize(data.width, data.height);
+                break;
+            case 'cd_play':
+                this.audio.play(data.track, data.loop);
+                break;
+            case 'cd_play':
+                this.audio.play(data.track, data.loop);
+                break;
+            case 'cd_stop':
+                this.audio.stop();
+                break;
+            case 'cd_getposition':
+                this.reply(data, this.audio.getPosition());
+                break;
+            default:
+                if (typeof data === 'string') {
+                    console.log(data);
+                }
+                else {
+                    console.log('unknown message');
+                    console.log(message);
+                }
+                break;
         }
     };
     XSystem35.prototype.handleError = function (event) {
@@ -82,12 +94,12 @@ var ZoomManager = (function () {
         var naclModule = $('#nacl_module');
         this.width = Number(naclModule.getAttribute('width'));
         this.height = Number(naclModule.getAttribute('height'));
-    }
-    ZoomManager.prototype.init = function () {
         this.zoomSelect = $('#zoom');
         this.zoomSelect.addEventListener('change', this.handleZoom.bind(this));
-        show(this.zoomSelect);
         document.addEventListener('webkitfullscreenchange', this.onFullScreenChange.bind(this));
+    }
+    ZoomManager.prototype.init = function () {
+        show(this.zoomSelect);
         var ratio = localStorage.getItem('zoom');
         if (ratio != 'full' && Number(ratio) < 1 || Number(ratio) > 3)
             ratio = null;

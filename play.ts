@@ -39,6 +39,7 @@ class XSystem35 {
         listener.addEventListener('message', this.handleMessage.bind(this), true);
         listener.addEventListener('error', this.handleError.bind(this), true);
         listener.addEventListener('crash', this.handleCrash.bind(this), true);
+        setupTouchHandlers(this.naclModule);
 
         requestFileSystem().then(
             (fs) => this.audio = new AudioPlayer(fs.root.toURL()));
@@ -47,25 +48,41 @@ class XSystem35 {
     private moduleDidLoad() {
         this.updateStatus('　');
         this.zoom.init();
-        setupTouchHandlers(this.naclModule);
     }
 
     private handleMessage(message:any) {
-      var data = message.data;
-      if (data.command == 'set_window_size') {
-        this.zoom.setWindowSize(data.width, data.height);
-      } else if (data.command == 'cd_play') {
-        this.audio.play(data.track, data.loop);
-      } else if (data.command == 'cd_stop') {
-        this.audio.stop();
-      } else if (data.command == 'cd_getposition') {
-        this.reply(data, this.audio.getPosition());
-      } else if (typeof data === 'string') {
-        console.log(data);  // debug message
-      } else {
-        console.log('unknown message');
-        console.log(message);
-      }
+        var data = message.data;
+        switch (data.command) {
+        case 'exit':
+            console.log('exit code: ' + data.code);
+            // Kill PNaCl module and reboot after 3 seconds
+            hide($('#contents'));
+            setTimeout(() => show($('#contents')), 3000);
+            break;
+        case 'set_window_size':
+            this.zoom.setWindowSize(data.width, data.height);
+            break;
+        case 'cd_play':
+            this.audio.play(data.track, data.loop);
+            break;
+        case 'cd_play':
+            this.audio.play(data.track, data.loop);
+            break;
+        case  'cd_stop':
+            this.audio.stop();
+            break;
+        case  'cd_getposition':
+            this.reply(data, this.audio.getPosition());
+            break;
+        default:
+            if (typeof data === 'string') {
+                console.log(data);  // debug message
+            } else {
+                console.log('unknown message');
+                console.log(message);
+            }
+            break;
+        }
     }
 
     private handleError(event:Event) {
@@ -100,13 +117,13 @@ class ZoomManager {
         var naclModule = $('#nacl_module');
         this.width = Number(naclModule.getAttribute('width'));
         this.height = Number(naclModule.getAttribute('height'));
+        this.zoomSelect = <HTMLInputElement>$('#zoom');
+        this.zoomSelect.addEventListener('change', this.handleZoom.bind(this));
+        document.addEventListener('webkitfullscreenchange', this.onFullScreenChange.bind(this));
     }
 
     init() {
-        this.zoomSelect = <HTMLInputElement>$('#zoom');
-        this.zoomSelect.addEventListener('change', this.handleZoom.bind(this));
         show(this.zoomSelect);
-        document.addEventListener('webkitfullscreenchange', this.onFullScreenChange.bind(this));
         var ratio = localStorage.getItem('zoom');
         if (ratio != 'full' && Number(ratio) < 1 || Number(ratio) > 3)
             ratio = null;
