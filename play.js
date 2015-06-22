@@ -97,6 +97,10 @@ var ZoomManager = (function () {
         this.zoomSelect = $('#zoom');
         this.zoomSelect.addEventListener('change', this.handleZoom.bind(this));
         document.addEventListener('webkitfullscreenchange', this.onFullScreenChange.bind(this));
+        if (navigator.userAgent.indexOf('Mac OS X') != -1) {
+            var opt = $('#option-fullscreen');
+            opt.parentElement.removeChild(opt);
+        }
     }
     ZoomManager.prototype.init = function () {
         show(this.zoomSelect);

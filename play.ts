@@ -120,6 +120,12 @@ class ZoomManager {
         this.zoomSelect = <HTMLInputElement>$('#zoom');
         this.zoomSelect.addEventListener('change', this.handleZoom.bind(this));
         document.addEventListener('webkitfullscreenchange', this.onFullScreenChange.bind(this));
+
+        if (navigator.userAgent.indexOf('Mac OS X') != -1) {
+            // Fullscreen by select.onchange does not work on Chrome Mac
+            var opt = $('#option-fullscreen');
+            opt.parentElement.removeChild(opt);
+        }
     }
 
     init() {
