@@ -14,13 +14,22 @@ class XSystem35 {
 
         this.naclModule = <PNaClElement>$('#nacl_module');
         this.zoom = new ZoomManager();
+
+        var ppapiSimpleVerbosity = '2'; // PSV_WARN
         if (window.location.search.length > 1) {
             for (var pair of window.location.search.substr(1).split('&')) {
                 var keyValue = pair.split('=');
-                if (keyValue[0] == 'debuglv')
+                switch (keyValue[0]) {
+                case 'debuglv':
                     this.naclModule.setAttribute('ARG2', keyValue[1]);
+                    break;
+                case 'ps_verbosity':
+                    ppapiSimpleVerbosity = keyValue[1];
+                    break;
+                }
             }
         }
+        this.naclModule.setAttribute('PS_VERBOSITY', ppapiSimpleVerbosity);
     }
 
     postMessage(message:any) {
