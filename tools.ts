@@ -43,6 +43,7 @@ class ToolsView {
         isInstalled().then((installed) => {
             if (installed) {
                 show($('.saveDataManager'));
+                show($('.config'));
                 toolsHost.findSaveData();
             } else {
                 show($('.notInstalled'));
@@ -51,6 +52,7 @@ class ToolsView {
 
         $('#downloadSaveData').addEventListener('click', this.handleDownloadSaveData.bind(this));
         $('#uploadSaveData').addEventListener('click', this.handleUploadSaveData.bind(this));
+        $('#antialias').addEventListener('change', this.handleAntialiasChange.bind(this));
     }
 
     saveDataFound() {
@@ -81,6 +83,13 @@ class ToolsView {
             toolsHost.uploadSaveData(input.files[0]);
         });
         input.click();
+    }
+
+    private handleAntialiasChange(evt:Event) {
+        if ((<HTMLInputElement>evt.target).checked)
+            localStorage.setItem('nmf', 'xsystem35/experimental/antialias/xsystem35.nmf');
+        else
+            localStorage.removeItem('nmf');
     }
 }
 

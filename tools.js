@@ -36,6 +36,7 @@ var ToolsView = (function () {
         isInstalled().then(function (installed) {
             if (installed) {
                 show($('.saveDataManager'));
+                show($('.config'));
                 toolsHost.findSaveData();
             }
             else {
@@ -44,6 +45,7 @@ var ToolsView = (function () {
         }, function () { return show($('.unsupported')); });
         $('#downloadSaveData').addEventListener('click', this.handleDownloadSaveData.bind(this));
         $('#uploadSaveData').addEventListener('click', this.handleUploadSaveData.bind(this));
+        $('#antialias').addEventListener('change', this.handleAntialiasChange.bind(this));
     }
     ToolsView.prototype.saveDataFound = function () {
         $('#downloadSaveData').removeAttribute('disabled');
@@ -69,6 +71,12 @@ var ToolsView = (function () {
             toolsHost.uploadSaveData(input.files[0]);
         });
         input.click();
+    };
+    ToolsView.prototype.handleAntialiasChange = function (evt) {
+        if (evt.target.checked)
+            localStorage.setItem('nmf', 'xsystem35/experimental/antialias/xsystem35.nmf');
+        else
+            localStorage.removeItem('nmf');
     };
     return ToolsView;
 })();

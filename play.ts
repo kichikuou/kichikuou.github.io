@@ -30,6 +30,10 @@ class XSystem35 {
             }
         }
         this.naclModule.setAttribute('PS_VERBOSITY', ppapiSimpleVerbosity);
+
+        var nmf = localStorage.getItem('nmf');
+        if (nmf)
+            this.naclModule.setAttribute('src', nmf);
     }
 
     postMessage(message:any) {
