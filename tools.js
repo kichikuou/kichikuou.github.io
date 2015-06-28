@@ -46,6 +46,8 @@ var ToolsView = (function () {
         $('#downloadSaveData').addEventListener('click', this.handleDownloadSaveData.bind(this));
         $('#uploadSaveData').addEventListener('click', this.handleUploadSaveData.bind(this));
         $('#antialias').addEventListener('change', this.handleAntialiasChange.bind(this));
+        if (localStorage.getItem('nmf'))
+            $('#antialias').checked = true;
     }
     ToolsView.prototype.saveDataFound = function () {
         $('#downloadSaveData').removeAttribute('disabled');

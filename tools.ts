@@ -53,6 +53,8 @@ class ToolsView {
         $('#downloadSaveData').addEventListener('click', this.handleDownloadSaveData.bind(this));
         $('#uploadSaveData').addEventListener('click', this.handleUploadSaveData.bind(this));
         $('#antialias').addEventListener('change', this.handleAntialiasChange.bind(this));
+        if (localStorage.getItem('nmf'))
+            (<HTMLInputElement>$('#antialias')).checked = true;
     }
 
     saveDataFound() {
