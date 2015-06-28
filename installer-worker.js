@@ -239,12 +239,16 @@ var Installer = (function () {
         for (var track = 1; track <= this.cdda.maxTrack(); track++) {
             if (track == 1) {
                 var isofs = new ISO9660FileSystem(new SectorReader(this.imgFile));
+                var grGenerator = new GameResourceGenerator();
                 var gamedata = isofs.getDirEnt('gamedata', isofs.rootDir());
                 for (var _i = 0, _a = isofs.readDir(gamedata); _i < _a.length; _i++) {
                     var e = _a[_i];
-                    if (e.name.toLowerCase().endsWith('.ald'))
+                    if (e.name.toLowerCase().endsWith('.ald')) {
                         this.copyFile(e, localfs.root, isofs);
+                        grGenerator.addFile(e.name.toLowerCase());
+                    }
                 }
+                grGenerator.generate(localfs.root);
             }
             else {
                 this.cdda.extractTrack(this.imgFile, track, localfs.root);
@@ -268,6 +272,28 @@ var Installer = (function () {
         console.log(src.name, performance.now() - startTime, 'msec');
     };
     return Installer;
+})();
+var GameResourceGenerator = (function () {
+    function GameResourceGenerator() {
+        this.lines = [];
+    }
+    GameResourceGenerator.prototype.addFile = function (name) {
+        var type = name.charAt(name.length - 6);
+        var id = name.charAt(name.length - 5);
+        this.basename = name.slice(0, -6);
+        this.lines.push(GameResourceGenerator.resourceType[type] + id.toUpperCase() + ' gamedata/' + name);
+    };
+    GameResourceGenerator.prototype.generate = function (dstDir) {
+        for (var i = 0; i < 10; i++) {
+            var id = String.fromCharCode(65 + i);
+            this.lines.push('Save' + id + ' gamedata/save/' + this.basename + 's' + id.toLowerCase() + '.asd');
+        }
+        var writer = dstDir.getFile('xsystem35.gr', { create: true }).createWriter();
+        writer.truncate(0);
+        writer.write(new Blob([this.lines.join('\n') + '\n']));
+    };
+    GameResourceGenerator.resourceType = { s: 'Scenario', g: 'Graphics', w: 'Wave', d: 'Data', r: 'Resource', m: 'Midi' };
+    return GameResourceGenerator;
 })();
 function uninstall() {
     var fs = self.webkitRequestFileSystemSync(self.PERSISTENT, 0);

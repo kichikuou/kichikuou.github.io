@@ -237,12 +237,16 @@ class Installer {
         for (var track = 1; track <= this.cdda.maxTrack(); track++) {
             if (track == 1) {
                 var isofs = new ISO9660FileSystem(new SectorReader(this.imgFile));
+                var grGenerator = new GameResourceGenerator();
 
                 var gamedata = isofs.getDirEnt('gamedata', isofs.rootDir());
                 for (var e of isofs.readDir(gamedata)) {
-                    if (e.name.toLowerCase().endsWith('.ald'))
+                    if (e.name.toLowerCase().endsWith('.ald')) {
                         this.copyFile(e, localfs.root, isofs);
+                        grGenerator.addFile(e.name.toLowerCase());
+                    }
                 }
+                grGenerator.generate(localfs.root);
             } else {
                 this.cdda.extractTrack(this.imgFile, track, localfs.root);
             }
@@ -264,6 +268,29 @@ class Installer {
             writer.write(new Blob(bufs));
         });
         console.log(src.name, performance.now() - startTime, 'msec');
+    }
+}
+
+class GameResourceGenerator {
+    static resourceType = {s:'Scenario', g:'Graphics', w:'Wave', d:'Data', r:'Resource', m:'Midi'};
+    private basename:string;
+    private lines:string[] = [];
+
+    addFile(name:string) {
+        var type = name.charAt(name.length - 6);
+        var id = name.charAt(name.length - 5);
+        this.basename = name.slice(0, -6);
+        this.lines.push(GameResourceGenerator.resourceType[type] + id.toUpperCase() + ' gamedata/' + name);
+    }
+
+    generate(dstDir:DirectoryEntrySync) {
+        for (var i = 0; i < 10; i++) {
+            var id = String.fromCharCode(65 + i);
+            this.lines.push('Save' + id + ' gamedata/save/' + this.basename + 's' + id.toLowerCase() + '.asd');
+        }
+        var writer = dstDir.getFile('xsystem35.gr', {create:true}).createWriter();
+        writer.truncate(0);
+        writer.write(new Blob([this.lines.join('\n') + '\n']));
     }
 }
 
