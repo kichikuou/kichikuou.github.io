@@ -15,13 +15,18 @@ class XSystem35 {
         this.naclModule = <PNaClElement>$('#nacl_module');
         this.zoom = new ZoomManager();
 
+        var naclArgs:string[] = [];
+        if (localStorage.getItem('antialias'))
+            naclArgs.push('-antialias');
+
         var ppapiSimpleVerbosity = '2'; // PSV_WARN
+        var debuglv = '1';
         if (window.location.search.length > 1) {
             for (var pair of window.location.search.substr(1).split('&')) {
                 var keyValue = pair.split('=');
                 switch (keyValue[0]) {
                 case 'debuglv':
-                    this.naclModule.setAttribute('ARG2', keyValue[1]);
+                    debuglv = keyValue[1];
                     break;
                 case 'ps_verbosity':
                     ppapiSimpleVerbosity = keyValue[1];
@@ -29,11 +34,10 @@ class XSystem35 {
                 }
             }
         }
+        naclArgs.push('-debuglv', debuglv);
+        for (var i = 0; i < naclArgs.length; i++)
+            this.naclModule.setAttribute('ARG' + (i+1), naclArgs[i]);
         this.naclModule.setAttribute('PS_VERBOSITY', ppapiSimpleVerbosity);
-
-        var nmf = localStorage.getItem('nmf');
-        if (nmf)
-            this.naclModule.setAttribute('src', nmf);
     }
 
     postMessage(message:any) {

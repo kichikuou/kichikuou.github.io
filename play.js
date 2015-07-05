@@ -3,14 +3,18 @@ var XSystem35 = (function () {
         isInstalled().then(this.init.bind(this), function () { return show($('.unsupported')); });
         this.naclModule = $('#nacl_module');
         this.zoom = new ZoomManager();
+        var naclArgs = [];
+        if (localStorage.getItem('antialias'))
+            naclArgs.push('-antialias');
         var ppapiSimpleVerbosity = '2';
+        var debuglv = '1';
         if (window.location.search.length > 1) {
             for (var _i = 0, _a = window.location.search.substr(1).split('&'); _i < _a.length; _i++) {
                 var pair = _a[_i];
                 var keyValue = pair.split('=');
                 switch (keyValue[0]) {
                     case 'debuglv':
-                        this.naclModule.setAttribute('ARG2', keyValue[1]);
+                        debuglv = keyValue[1];
                         break;
                     case 'ps_verbosity':
                         ppapiSimpleVerbosity = keyValue[1];
@@ -18,10 +22,10 @@ var XSystem35 = (function () {
                 }
             }
         }
+        naclArgs.push('-debuglv', debuglv);
+        for (var i = 0; i < naclArgs.length; i++)
+            this.naclModule.setAttribute('ARG' + (i + 1), naclArgs[i]);
         this.naclModule.setAttribute('PS_VERBOSITY', ppapiSimpleVerbosity);
-        var nmf = localStorage.getItem('nmf');
-        if (nmf)
-            this.naclModule.setAttribute('src', nmf);
     }
     XSystem35.prototype.postMessage = function (message) {
         this.naclModule.postMessage(message);

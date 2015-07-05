@@ -46,7 +46,7 @@ var ToolsView = (function () {
         $('#downloadSaveData').addEventListener('click', this.handleDownloadSaveData.bind(this));
         $('#uploadSaveData').addEventListener('click', this.handleUploadSaveData.bind(this));
         $('#antialias').addEventListener('change', this.handleAntialiasChange.bind(this));
-        if (localStorage.getItem('nmf'))
+        if (localStorage.getItem('antialias'))
             $('#antialias').checked = true;
     }
     ToolsView.prototype.saveDataFound = function () {
@@ -76,9 +76,9 @@ var ToolsView = (function () {
     };
     ToolsView.prototype.handleAntialiasChange = function (evt) {
         if (evt.target.checked)
-            localStorage.setItem('nmf', 'xsystem35/experimental/antialias/xsystem35.nmf');
+            localStorage.setItem('antialias', 'true');
         else
-            localStorage.removeItem('nmf');
+            localStorage.removeItem('antialias');
     };
     return ToolsView;
 })();

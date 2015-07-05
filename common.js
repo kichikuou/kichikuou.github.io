@@ -21,3 +21,7 @@ function isInstalled() {
         });
     });
 }
+if (localStorage.getItem('nmf')) {
+    localStorage.setItem('antialias', 'true');
+    localStorage.removeItem('nmf');
+}

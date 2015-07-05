@@ -25,3 +25,9 @@ function isInstalled(): Promise<boolean> {
         });
     });
 }
+
+// Migrate from old configuration
+if (localStorage.getItem('nmf')) {
+    localStorage.setItem('antialias', 'true');
+    localStorage.removeItem('nmf');
+}
