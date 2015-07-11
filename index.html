@@ -5,6 +5,15 @@
   <title>鬼畜王 on Chrome</title>
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css">
   <link rel="stylesheet" href="style.css">
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-63593541-1', 'auto');
+    ga('send', 'pageview');
+  </script>
 </head>
 <body>
   <div class="navbar pure-menu pure-menu-horizontal">
@@ -22,7 +31,7 @@
     <div class="unsupported hidden">
       このブラウザでは利用できません。PC版 Google Chrome 42以降が必要です。
     </div>
-    <p>アリスソフトの <a href="http://www.alicesoft.com/annai.html#free">配布フリー宣言</a> に基づいて配布されている「鬼畜王ランス」を Google Chrome 上で遊べるようにしたものです。</p>
+    <p>アリスソフトの <a href="http://www.alicesoft.com/annai.html#free">配布フリー宣言</a> に基づいて配布されている18禁ゲーム「鬼畜王ランス」を Google Chrome 上で遊べるようにしたものです。</p>
 
     <div class="notinstalled hidden center">
       <a class="pure-button pure-button-primary" href="install.html">インストール</a>
@@ -31,10 +40,32 @@
       <a class="pure-button pure-button-primary" href="play.html">ゲーム開始</a>
     </div>
 
+    <h3>更新情報</h3>
+    <div id="history-collapsed">
+      <dl class="history">
+	<dt>2015-07-05</dt><dd>フォントのアンチエイリアスに対応。<a href="tools.html">ツール</a>から設定できます。</dd>
+      </dl>
+      <div class="history-expander">
+	<a id="expand-history" href="#history">もっと見る</a>
+      </div>
+    </div>
+    <div id="history-expanded" class="hidden">
+      <dl class="history">
+	<dt>2015-07-05</dt><dd>フォントのアンチエイリアスに対応。<a href="tools.html">ツール</a>から設定できます。</dd>
+	<dt>2015-06-22</dt><dd>全画面モードを追加。</dd>
+	<dt>2015-06-21</dt><dd>タッチ操作に対応。長押しで右クリックになります。</dd>
+	<dt>2015-06-14</dt><dd>セーブデータをzipに保存/復元できるようにした。</dd>
+	<dt>2015-06-11</dt><dd>公開。</dd>
+      </dl>
+      <div class="history-expander">
+	<a id="collapse-history" href="#history">折りたたむ</a>
+      </div>
+    </div>
+
     <h3>詳しい説明</h3>
     <p>アリスソフトのゲームエンジン System3.5 の有志によるフリー実装である xsystem35 を Portable Native Client に移植したものです。Windows, Mac, Linux, Chrome OS 上の Chrome で動きます。 Android と iOS 版 Chrome では動作しません。</p>
     <p>素晴らしいゲームがせっかくフリーで提供されているのに、遊ぶためのハードルが高い（CD-R に書き込むか仮想 CD ソフトを入れるか、Windows 以外ではもっと大変…）という状況を改善できれば、という試みです。</p>
-    <p>このサイト自体は実行環境のみ提供するもので、遊ぶためにはゲームの CD イメージを別途ダウンロードする必要があります。</p>
+    <p>このサイト自体は実行環境のみ提供するもので、遊ぶためにはゲームの CD イメージを別途ダウンロードする必要があります。（<a href="install.html">インストール</a> ページに配布サイトへのリンクがあります）</p>
     <p>ソースコードは以下の場所にあります。</p>
     <ul>
       <li><a href="https://github.com/kichikuou/xsystem35-nacl">https://github.com/kichikuou/xsystem35-nacl</a> - xsystem35 の PNaCl 版</li>
@@ -50,15 +81,6 @@
     </div>
   </div>
 
-  <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-63593541-1', 'auto');
-    ga('send', 'pageview');
-  </script>
   <script src="common.js"></script>
   <script src="index.js"></script>
 </body>

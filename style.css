@@ -35,6 +35,14 @@ body {
     margin: 4ex auto 0;
 }
 
+dl.history {
+    margin-bottom: 0;
+}
+
+.history-expander {
+    text-align: right;
+}
+
 .social-buttons {
     margin: 1em 0;
     float: right;
