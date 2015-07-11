@@ -30,6 +30,7 @@ class InstallerHost {
 
     uninstall() {
         this.send({command:'uninstall'});
+        localStorage.clear();
     }
 
     fetchFont(): Promise<Blob> {

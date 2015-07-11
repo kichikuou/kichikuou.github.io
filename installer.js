@@ -24,6 +24,7 @@ var InstallerHost = (function () {
     };
     InstallerHost.prototype.uninstall = function () {
         this.send({ command: 'uninstall' });
+        localStorage.clear();
     };
     InstallerHost.prototype.fetchFont = function () {
         var _this = this;
