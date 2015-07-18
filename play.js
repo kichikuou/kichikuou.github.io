@@ -99,7 +99,7 @@ var XSystem35 = (function () {
         this.postMessage({ 'naclmsg': result });
     };
     XSystem35.prototype.updateStatus = function (status) {
-        $('#contents .status').textContent = status;
+        $('.pnacl-status').textContent = status;
     };
     return XSystem35;
 })();

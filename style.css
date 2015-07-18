@@ -1,3 +1,4 @@
+/*** base ***/
 body {
     font-size: 15px;
 }
@@ -6,26 +7,23 @@ body {
     background: #464646;
     color: white;
 }
-
-.pure-menu-heading, .pure-menu-heading:visited {
+.navbar .pure-menu-heading, .navbar .pure-menu-heading:visited {
     text-transform: none;
     font-weight: bold;
     color: white;
 }
-
 .navbar .pure-menu-selected a, .navbar .pure-menu-selected a:visited {
     color: white;
 }
 .navbar a {
     color: #cccccc;
 }
-.navbar li a:hover,
-.navbar li a:focus {
+.navbar .pure-menu-item a:hover,
+.navbar .pure-menu-item a:focus {
     background: none;
     border: none;
     color: #aaaaaa;
 }
-
 .navbar ul {
     float: right;
 }
@@ -35,10 +33,19 @@ body {
     margin: 4ex auto 0;
 }
 
-dl.history {
-    margin-bottom: 0;
+.unsupported {
+    color: red;
 }
 
+/*** index.html ***/
+.start-button {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.history {
+    margin-bottom: 0;
+}
 .history-expander {
     text-align: right;
 }
@@ -48,47 +55,32 @@ dl.history {
     float: right;
 }
 
+/*** install.html ***/
 .instructions {
     margin-bottom: 4ex;
 }
-
-.instructions li {
+.instructions .step {
     margin-bottom: 1ex;
 }
 
 .files ul {
     list-style-type: none;
 }
-
 .files li {
     color: #0078e7;
 }
-
 .files li.notready {
     color: #808080;
 }
-
 .files li.notready:after {
     content: " (未選択)";
-}
-
-.unsupported {
-    color: red;
-}
-
-.hidden {
-    display: none;
 }
 
 #preload {
     visibility: hidden;
 }
 
-.center {
-    text-align: center;
-    padding: 20px 0;
-}
-
+/*** play.html ***/
 .bgblack-fade {
     background-color: black;
     transition-property: background-color;
@@ -96,7 +88,7 @@ dl.history {
     transition-timing-function: linear;
 }
 
-.status {
+.pnacl-status {
     color: #999999;
 }
 
@@ -116,6 +108,7 @@ dl.history {
     box-shadow: none;
 }
 
+/*** tools.html ***/
 #uploadResult {
     color: red;
 }

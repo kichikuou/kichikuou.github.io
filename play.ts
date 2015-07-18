@@ -120,7 +120,7 @@ class XSystem35 {
     }
 
     private updateStatus(status:string) {
-        $('#contents .status').textContent = status;
+        $('.pnacl-status').textContent = status;
     }
 }
 
