@@ -84,10 +84,6 @@ var InstallerHost = (function () {
 var InstallerView = (function () {
     function InstallerView() {
         var _this = this;
-        $('#fileselect').addEventListener('change', this.handleFileSelect.bind(this), false);
-        document.body.ondragover = this.handleDragOver.bind(this);
-        document.body.ondrop = this.handleDrop.bind(this);
-        $('#uninstall').addEventListener('click', this.handleUninstall.bind(this));
         window.onbeforeunload = this.handleBeforeunload.bind(this);
         isInstalled().then(function (installed) {
             if (installed)
@@ -120,6 +116,16 @@ var InstallerView = (function () {
                 hide(this.state);
             show(newState);
             this.state = newState;
+            switch (state) {
+                case 'files':
+                    $('#fileselect').addEventListener('change', this.handleFileSelect.bind(this), false);
+                    document.body.ondragover = this.handleDragOver.bind(this);
+                    document.body.ondrop = this.handleDrop.bind(this);
+                    break;
+                case 'installed':
+                    $('#uninstall').addEventListener('click', this.handleUninstall.bind(this));
+                    break;
+            }
         }
     };
     InstallerView.prototype.handleBeforeunload = function () {
