@@ -222,7 +222,26 @@ var CDDA = (function () {
 })();
 var Installer = (function () {
     function Installer() {
+        addEventListener('message', this.onMessage.bind(this));
     }
+    Installer.prototype.onMessage = function (evt) {
+        switch (evt.data.command) {
+            case 'setFile':
+                this.setFile(evt.data.file);
+                postMessage({ command: 'readyState', imgReady: !!this.imgFile, cueReady: !!this.cdda });
+                break;
+            case 'install':
+                if (this.ready())
+                    this.install();
+                break;
+            case 'uninstall':
+                uninstall();
+                break;
+            case 'setFont':
+                installFont(evt.data);
+                break;
+        }
+    };
     Installer.prototype.setFile = function (file) {
         if (file.name.toLowerCase().endsWith('.img'))
             this.imgFile = file;
@@ -232,8 +251,6 @@ var Installer = (function () {
     Installer.prototype.ready = function () {
         return this.imgFile && this.cdda && true;
     };
-    Installer.prototype.imgReady = function () { return !!this.imgFile; };
-    Installer.prototype.cueReady = function () { return !!this.cdda; };
     Installer.prototype.install = function () {
         var localfs = self.webkitRequestFileSystemSync(self.PERSISTENT, 650 * 1024 * 1024);
         for (var track = 1; track <= this.cdda.maxTrack(); track++) {
@@ -281,6 +298,52 @@ var Installer = (function () {
     };
     return Installer;
 })();
+var AdvancedInstaller = (function () {
+    function AdvancedInstaller() {
+        addEventListener('message', this.onMessage.bind(this));
+    }
+    AdvancedInstaller.prototype.onMessage = function (evt) {
+        switch (evt.data.command) {
+            case 'install':
+                this.install(evt.data.files);
+                break;
+            case 'uninstall':
+                uninstall();
+                break;
+            case 'setFont':
+                installFont(evt.data);
+                break;
+        }
+    };
+    AdvancedInstaller.prototype.install = function (files) {
+        var localfs = self.webkitRequestFileSystemSync(self.PERSISTENT, 650 * 1024 * 1024);
+        var grGenerator = new GameResourceGenerator();
+        var tracks = [];
+        for (var i = 0; i < files.length; i++) {
+            var f = files[i];
+            var fname = f.name.toLowerCase();
+            var dstdir = localfs.root;
+            if (fname.endsWith('.ald'))
+                grGenerator.addFile(fname);
+            else {
+                var match = /(\d+)\.(wav|mp3|ogg)$/.exec(fname);
+                if (match)
+                    tracks[Number(match[1])] = fname;
+                else
+                    dstdir = localfs.root.getDirectory('save', { create: true });
+            }
+            this.copyFile(f, dstdir);
+            postMessage({ command: 'progress', value: i, max: files.length });
+        }
+        grGenerator.generate(localfs.root);
+        postMessage({ command: 'complete', tracks: tracks });
+    };
+    AdvancedInstaller.prototype.copyFile = function (file, dstDir) {
+        dstDir.getFile(file.name.toLowerCase(), { create: true })
+            .createWriter().write(file);
+    };
+    return AdvancedInstaller;
+})();
 var GameResourceGenerator = (function () {
     function GameResourceGenerator() {
         this.lines = [];
@@ -292,7 +355,7 @@ var GameResourceGenerator = (function () {
         this.lines.push(GameResourceGenerator.resourceType[type] + id.toUpperCase() + ' gamedata/' + name);
     };
     GameResourceGenerator.prototype.generate = function (dstDir) {
-        for (var i = 0; i < 10; i++) {
+        for (var i = 0; i < 26; i++) {
             var id = String.fromCharCode(65 + i);
             this.lines.push('Save' + id + ' gamedata/save/' + this.basename + 's' + id.toLowerCase() + '.asd');
         }
@@ -326,23 +389,4 @@ function installFont(data) {
     fs.root.getDirectory('save', { create: true });
     postMessage({ command: 'setFontDone' });
 }
-var installer = new Installer();
-function onMessage(evt) {
-    switch (evt.data.command) {
-        case 'setFile':
-            installer.setFile(evt.data.file);
-            postMessage({ command: 'readyState', imgReady: installer.imgReady(), cueReady: installer.cueReady() });
-            break;
-        case 'install':
-            if (installer.ready())
-                installer.install();
-            break;
-        case 'uninstall':
-            uninstall();
-            break;
-        case 'setFont':
-            installFont(evt.data);
-            break;
-    }
-}
-addEventListener('message', onMessage);
+var installer = location.search.startsWith('?advanced') ? new AdvancedInstaller() : new Installer();

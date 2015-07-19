@@ -218,21 +218,41 @@ class Installer {
     private imgFile:File;
     private cdda:CDDA;
 
-    setFile(file:File) {
+    constructor() {
+        addEventListener('message', this.onMessage.bind(this));
+    }
+
+    private onMessage(evt: MessageEvent) {
+        switch (evt.data.command) {
+        case 'setFile':
+            this.setFile(evt.data.file);
+            postMessage({command:'readyState', imgReady:!!this.imgFile, cueReady:!!this.cdda});
+            break;
+        case 'install':
+            if (this.ready())
+                this.install();
+            break;
+        case 'uninstall':
+            uninstall();
+            break;
+        case 'setFont':
+            installFont(evt.data);
+            break;
+        }
+    }
+
+    private setFile(file:File) {
         if (file.name.toLowerCase().endsWith('.img'))
             this.imgFile = file;
         else if (file.name.toLowerCase().endsWith('.cue'))
             this.cdda = new CDDA(file);
     }
 
-    ready(): boolean {
+    private ready(): boolean {
         return this.imgFile && this.cdda && true;
     }
 
-    imgReady(): boolean { return !!this.imgFile; }
-    cueReady(): boolean { return !!this.cdda; }
-
-    install() {
+    private install() {
         var localfs = self.webkitRequestFileSystemSync(self.PERSISTENT, 650*1024*1024);
         for (var track = 1; track <= this.cdda.maxTrack(); track++) {
             if (track == 1) {
@@ -263,7 +283,7 @@ class Installer {
         postMessage({command:'complete'});
     }
 
-    copyFile(src:DirEnt, dstDir:DirectoryEntrySync, isofs:ISO9660FileSystem) {
+    private copyFile(src:DirEnt, dstDir:DirectoryEntrySync, isofs:ISO9660FileSystem) {
         var startTime = performance.now();
         var dstFile = dstDir.getFile(src.name.toLowerCase(), {create:true});
         var writer = dstFile.createWriter();
@@ -276,6 +296,56 @@ class Installer {
             writer.write(new Blob(bufs));
         });
         console.log(src.name, performance.now() - startTime, 'msec');
+    }
+}
+
+class AdvancedInstaller {
+    constructor() {
+        addEventListener('message', this.onMessage.bind(this));
+    }
+
+    private onMessage(evt: MessageEvent) {
+        switch (evt.data.command) {
+        case 'install':
+            this.install(evt.data.files);
+            break;
+        case 'uninstall':
+            uninstall();
+            break;
+        case 'setFont':
+            installFont(evt.data);
+            break;
+        }
+    }
+
+    private install(files:File[]) {
+        var localfs = self.webkitRequestFileSystemSync(self.PERSISTENT, 650*1024*1024);
+        var grGenerator = new GameResourceGenerator();
+        var tracks:string[] = [];
+
+        for (var i = 0; i < files.length; i++) {
+            var f = files[i];
+            var fname = f.name.toLowerCase();
+            var dstdir = localfs.root;
+            if (fname.endsWith('.ald'))
+                grGenerator.addFile(fname);
+            else {
+                var match = /(\d+)\.(wav|mp3|ogg)$/.exec(fname);
+                if (match)
+                    tracks[Number(match[1])] = fname;
+                else
+                    dstdir = localfs.root.getDirectory('save', {create:true});
+            }
+            this.copyFile(f, dstdir);
+            postMessage({command:'progress', value:i, max:files.length});
+        }
+        grGenerator.generate(localfs.root);
+        postMessage({command:'complete', tracks:tracks});
+    }
+
+    private copyFile(file:File, dstDir:DirectoryEntrySync) {
+        dstDir.getFile(file.name.toLowerCase(), {create:true})
+            .createWriter().write(file);
     }
 }
 
@@ -292,7 +362,7 @@ class GameResourceGenerator {
     }
 
     generate(dstDir:DirectoryEntrySync) {
-        for (var i = 0; i < 10; i++) {
+        for (var i = 0; i < 26; i++) {
             var id = String.fromCharCode(65 + i);
             this.lines.push('Save' + id + ' gamedata/save/' + this.basename + 's' + id.toLowerCase() + '.asd');
         }
@@ -327,25 +397,4 @@ function installFont(data:any) {
     postMessage({command:'setFontDone'});
 }
 
-var installer = new Installer();
-
-function onMessage(evt: MessageEvent) {
-    switch (evt.data.command) {
-    case 'setFile':
-        installer.setFile(evt.data.file);
-        postMessage({command:'readyState', imgReady:installer.imgReady(), cueReady:installer.cueReady()});
-        break;
-    case 'install':
-        if (installer.ready())
-            installer.install();
-        break;
-    case 'uninstall':
-        uninstall();
-        break;
-    case 'setFont':
-        installFont(evt.data);
-        break;
-    }
-}
-
-addEventListener('message', onMessage);
+var installer = location.search.startsWith('?advanced') ? new AdvancedInstaller() : new Installer();

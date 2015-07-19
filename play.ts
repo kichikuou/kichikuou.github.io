@@ -288,10 +288,12 @@ class AudioPlayer {
     private currentTrack:number;
     private volume:number;
     private muted:boolean;
+    private tracks:string[];
 
     constructor(private bgmDir:string) {
         this.volume = Number(localStorage.getItem('volume') || 1);
         this.muted = false;
+        this.tracks = JSON.parse(localStorage.getItem('tracks') || '[]');
     }
 
     play(track:number, loop:number) {
@@ -299,7 +301,7 @@ class AudioPlayer {
           this.stop();
 
         var audio = document.createElement('audio');
-        audio.setAttribute('src', this.bgmDir + 'track' + track + '.wav');
+        audio.setAttribute('src', this.trackURL(track));
         audio.setAttribute('controls', 'true');
         audio.volume = this.volume;
         audio.muted = this.muted;
@@ -329,6 +331,10 @@ class AudioPlayer {
 
         var time = Math.round(this.elem.currentTime * 75);
         return this.currentTrack | time << 8;
+    }
+
+    private trackURL(n:number): string {
+        return this.bgmDir + (this.tracks[n] || 'track' + n + '.wav');
     }
 }
 

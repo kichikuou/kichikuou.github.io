@@ -4,7 +4,7 @@ class InstallerHost {
     private fontBlob: Promise<Blob>;
     private fontErrorCount = 0;
 
-    constructor() {
+    constructor(private view:InstallerView) {
         this.initWorker();
     }
 
@@ -22,7 +22,7 @@ class InstallerHost {
     startInstall() {
         (<any>navigator).webkitPersistentStorage.requestQuota(650*1024*1024, ()=>{
             this.send({command:'install'});
-            view.setProgress(0, 1);
+            this.view.setProgress(0, 1);
             if (!this.fontBlob)
                 this.fontBlob = this.fetchFont();
         }); // TODO: add error handler
@@ -56,21 +56,21 @@ class InstallerHost {
     private onMessage(evt: MessageEvent) {
         switch (evt.data.command) {
         case 'readyState':
-            view.setReadyState(evt.data.imgReady, evt.data.cueReady);
+            this.view.setReadyState(evt.data.imgReady, evt.data.cueReady);
             if (evt.data.imgReady && evt.data.cueReady)
                 this.startInstall();
             break;
         case 'progress':
-            view.setProgress(evt.data.value, evt.data.max);
+            this.view.setProgress(evt.data.value, evt.data.max);
             break;
         case 'complete':
             this.fontBlob.then(blob => this.send({command:'setFont', name:'MTLc3m.ttf', blob:blob}));
             break;
         case 'setFontDone':
-            view.onComplete();
+            this.view.onComplete();
             break;
         case 'uninstalled':
-            view.onUninstallComplete();
+            this.view.onUninstallComplete();
             break;
         case 'writeFailed':
             // Chrome may fail to write to local filesystem because of the
@@ -85,7 +85,7 @@ class InstallerHost {
                 this.send({command:'setFile', file:f});
             break;
         case 'error':
-            view.onError(evt.data.message);
+            this.view.onError(evt.data.message);
             break;
         }
     }
@@ -96,9 +96,11 @@ class InstallerHost {
 }
 
 class InstallerView {
+    private host:InstallerHost;
     private state:HTMLElement;
 
     constructor() {
+        this.host = new InstallerHost(this);
         window.onbeforeunload = this.handleBeforeunload.bind(this);
 
         isInstalled().then((installed) => {
@@ -165,7 +167,7 @@ class InstallerView {
         var input = <HTMLInputElement>evt.target;
         var files = input.files;
         for (var i = 0; i < files.length; i++)
-            host.setFile(files[i]);
+            this.host.setFile(files[i]);
         input.value = '';
     }
 
@@ -180,16 +182,15 @@ class InstallerView {
         evt.preventDefault();
         var files = evt.dataTransfer.files;
         for (var i = 0; i < files.length; i++)
-            host.setFile(files[i]);
+            this.host.setFile(files[i]);
     }
 
     private handleUninstall(evt:Event) {
         if (!window.confirm("アンインストールしてよろしいですか？ セーブデータも削除されます。"))
             return;
-        host.uninstall();
+        this.host.uninstall();
         this.setState('uninstalling');
     }
 }
 
-var host = new InstallerHost();
-var view = new InstallerView();
+var installer_view = new InstallerView();

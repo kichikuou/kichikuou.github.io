@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>鬼畜王ランス以外のゲームをインストールする - 鬼畜王 on Chrome</title>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="navbar pure-menu pure-menu-horizontal">
+    <a class="pure-menu-heading" href="/">鬼畜王 on Chrome</a>
+    <ul class="pure-menu-list">
+      <li class="pure-menu-item"><a href="/" class="pure-menu-link">ホーム</a></li>
+      <li class="pure-menu-item"><a href="install.html" class="pure-menu-link">インストール</a></li>
+      <li class="pure-menu-item"><a href="play.html" class="pure-menu-link">ゲーム</a></li>
+      <li class="pure-menu-item"><a href="tools.html" class="pure-menu-link">ツール</a></li>
+    </ul>
+  </div>
+
+  <div class="contents">
+    <div class="instructions">
+      <h2>鬼畜王ランス以外のゲームをインストールする</h2>
+
+      <p>鬼畜王 on Chromeはxsystem35を利用しているため、<a href="https://github.com/kichikuou/xsystem35-nacl/blob/master/doc/GAMES.TXT">xsystem35で動くゲーム</a>なら動かせる可能性があります。</p>
+
+      <p>上記のリンク先に記載があるゲームでも、DOS/Win3.1版とWin95版がある場合は、Win95版（＝System3.5版）しかインストールできません。例えば<a href="http://retropc.net/alice/">アリスソフトアーカイブズ</a>で配布されている「マルチプラットフォーム版」はSystem3版なのでインストールできません。</p>
+
+      <p>同時に複数のゲームをインストールすることはできません。</p>
+
+      <h3>ディスクイメージからインストールする</h3>
+
+      <p>SlySoft CloneCD形式のイメージがあれば、通常の<a href="install.html">インストーラー</a>からimgファイルとcueファイルをドラッグ＆ドロップしてインストールできます。鬼畜王ランスのほかに、<a href="http://www.geocities.jp/webmst_kitana/alicefree/index.html">こちら</a>で配布されている闘神都市IIがこの形式です。</p>
+
+      <h3>ファイルからインストールする</h3>
+
+      <p>ゲームのCDをお持ちの場合は、CD内のファイルを使ってインストールすることができます。</p>
+
+      <p>ただしCD音源に関してはブラウザからは読み出す方法がないので、Windows Media Playerなどを使ってオーディオトラックをファイルとして取り込んでいただく必要があります。ファイル形式は wav, mp3, ogg に対応しています。</p>
+
+      <p>インストーラーではファイル名の拡張子直前の部分をトラック番号として認識します。つまり、02.wav, 03.wav, 04.wav, ... や、 Track2.mp3, Track3.mp3, Track4.mp3, ... のようなファイル名で取り込んでください。</p>
+
+      <p>以下のファイルをすべてこのページにドラッグ＆ドロップして、ページ一番下の「インストール」ボタンを押してください。</p>
+
+      <ul>
+	<li>ゲームCDのGAMEDATAフォルダ内の拡張子.ALDのファイル</li>
+	<li>CDのオーディオトラックを取り込んだ音楽ファイル</li>
+      </ul>
+
+      <p>配布フリーで入手できるもののうち、ALICEの館4・5・6に収録の旧作のSystem3.5移植版はこの方法でインストールできます。<a href="http://www.geocities.jp/webmst_kitana/alicefree/index.html">こちら</a>の「移植456」をダウンロード・展開して、インストールしたいゲームのフォルダにある .ALD ファイルをすべてドロップしてください。（これらのBGMはMIDI音源のため、オーディオトラックを取り込む必要はありません。）</p>
+    </div>
+
+    <div class="files hidden">
+      <p>インストールするファイル:</p>
+      <ul id="file-list"></ul>
+      <button id="install" class="pure-button pure-button-primary pure-button-disabled">インストール</button>
+    </div>
+
+    <div class="progress hidden">
+      インストールしています : <progress id="progressBar" value=0></progress>
+    </div>
+
+    <div class="installed hidden">
+      インストール済みです。
+      <a class="pure-button pure-button-primary" href="play.html">ゲーム開始</a>
+      <button id="uninstall" class="pure-button">アンインストール</button>
+    </div>
+
+    <div class="uninstalling hidden">
+      アンインストール中です...
+    </div>
+
+    <div class="uninstalled hidden">
+      アンインストールが完了しました。
+    </div>
+
+    <div class="install-failed hidden"></div>
+
+    <div class="unsupported hidden">
+      このブラウザでは利用できません。PC版 Google Chrome 42以降が必要です。
+    </div>
+
+  </div>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-63593541-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+  <script src="common.js"></script>
+  <script src="advanced-installer.js"></script>
+</body>
+</html>

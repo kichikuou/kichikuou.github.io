@@ -255,12 +255,13 @@ var AudioPlayer = (function () {
         this.bgmDir = bgmDir;
         this.volume = Number(localStorage.getItem('volume') || 1);
         this.muted = false;
+        this.tracks = JSON.parse(localStorage.getItem('tracks') || '[]');
     }
     AudioPlayer.prototype.play = function (track, loop) {
         if (this.elem)
             this.stop();
         var audio = document.createElement('audio');
-        audio.setAttribute('src', this.bgmDir + 'track' + track + '.wav');
+        audio.setAttribute('src', this.trackURL(track));
         audio.setAttribute('controls', 'true');
         audio.volume = this.volume;
         audio.muted = this.muted;
@@ -287,6 +288,9 @@ var AudioPlayer = (function () {
             return 0;
         var time = Math.round(this.elem.currentTime * 75);
         return this.currentTrack | time << 8;
+    };
+    AudioPlayer.prototype.trackURL = function (n) {
+        return this.bgmDir + (this.tracks[n] || 'track' + n + '.wav');
     };
     return AudioPlayer;
 })();

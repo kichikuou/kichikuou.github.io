@@ -1,5 +1,6 @@
 var InstallerHost = (function () {
-    function InstallerHost() {
+    function InstallerHost(view) {
+        this.view = view;
         this.files = [];
         this.fontErrorCount = 0;
         this.initWorker();
@@ -17,7 +18,7 @@ var InstallerHost = (function () {
         var _this = this;
         navigator.webkitPersistentStorage.requestQuota(650 * 1024 * 1024, function () {
             _this.send({ command: 'install' });
-            view.setProgress(0, 1);
+            _this.view.setProgress(0, 1);
             if (!_this.fontBlob)
                 _this.fontBlob = _this.fetchFont();
         });
@@ -49,21 +50,21 @@ var InstallerHost = (function () {
         var _this = this;
         switch (evt.data.command) {
             case 'readyState':
-                view.setReadyState(evt.data.imgReady, evt.data.cueReady);
+                this.view.setReadyState(evt.data.imgReady, evt.data.cueReady);
                 if (evt.data.imgReady && evt.data.cueReady)
                     this.startInstall();
                 break;
             case 'progress':
-                view.setProgress(evt.data.value, evt.data.max);
+                this.view.setProgress(evt.data.value, evt.data.max);
                 break;
             case 'complete':
                 this.fontBlob.then(function (blob) { return _this.send({ command: 'setFont', name: 'MTLc3m.ttf', blob: blob }); });
                 break;
             case 'setFontDone':
-                view.onComplete();
+                this.view.onComplete();
                 break;
             case 'uninstalled':
-                view.onUninstallComplete();
+                this.view.onUninstallComplete();
                 break;
             case 'writeFailed':
                 console.log('terminating worker');
@@ -75,7 +76,7 @@ var InstallerHost = (function () {
                 }
                 break;
             case 'error':
-                view.onError(evt.data.message);
+                this.view.onError(evt.data.message);
                 break;
         }
     };
@@ -87,6 +88,7 @@ var InstallerHost = (function () {
 var InstallerView = (function () {
     function InstallerView() {
         var _this = this;
+        this.host = new InstallerHost(this);
         window.onbeforeunload = this.handleBeforeunload.bind(this);
         isInstalled().then(function (installed) {
             if (installed)
@@ -143,7 +145,7 @@ var InstallerView = (function () {
         var input = evt.target;
         var files = input.files;
         for (var i = 0; i < files.length; i++)
-            host.setFile(files[i]);
+            this.host.setFile(files[i]);
         input.value = '';
     };
     InstallerView.prototype.handleDragOver = function (evt) {
@@ -156,15 +158,14 @@ var InstallerView = (function () {
         evt.preventDefault();
         var files = evt.dataTransfer.files;
         for (var i = 0; i < files.length; i++)
-            host.setFile(files[i]);
+            this.host.setFile(files[i]);
     };
     InstallerView.prototype.handleUninstall = function (evt) {
         if (!window.confirm("アンインストールしてよろしいですか？ セーブデータも削除されます。"))
             return;
-        host.uninstall();
+        this.host.uninstall();
         this.setState('uninstalling');
     };
     return InstallerView;
 })();
-var host = new InstallerHost();
-var view = new InstallerView();
+var installer_view = new InstallerView();
