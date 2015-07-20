@@ -8,14 +8,19 @@ class XSystem35 {
     private naclModule:PNaClElement;
     private audio:AudioPlayer;
     private zoom:ZoomManager;
+    private webMidiLinkUrl:string;
+    private midiPlayer:MidiPlayer;
 
     constructor() {
         isInstalled().then(this.init.bind(this), () => show($('.unsupported')));
 
         this.naclModule = <PNaClElement>$('#nacl_module');
         this.zoom = new ZoomManager();
+        this.webMidiLinkUrl = localStorage.getItem('midi');
 
         var naclArgs:string[] = [];
+        if (this.webMidiLinkUrl)
+            naclArgs.push('-Mn')
         if (localStorage.getItem('antialias'))
             naclArgs.push('-antialias');
 
@@ -65,6 +70,8 @@ class XSystem35 {
     private moduleDidLoad() {
         this.updateStatus('　');
         this.zoom.init();
+        if (this.webMidiLinkUrl)
+            this.midiPlayer = new MidiPlayer(this.webMidiLinkUrl);
     }
 
     private handleMessage(message:any) {
@@ -93,6 +100,12 @@ class XSystem35 {
             break;
         case 'cd_getposition':
             this.reply(data, this.audio.getPosition());
+            break;
+        case 'midi_start':
+            this.midiPlayer.play(data.data);
+            break;
+        case 'midi_stop':
+            this.midiPlayer.stop();
             break;
         default:
             if (typeof data === 'string') {
@@ -335,6 +348,36 @@ class AudioPlayer {
 
     private trackURL(n:number): string {
         return this.bgmDir + (this.tracks[n] || 'track' + n + '.wav');
+    }
+}
+
+class MidiPlayer {
+    private worker: Worker;
+    private iframe: HTMLIFrameElement;
+
+    constructor(url:string) {
+        this.worker = new Worker('midi-worker.js');
+        this.iframe = document.createElement('iframe');
+        this.worker.addEventListener('message', this.onMessageFromWorker.bind(this));
+        window.addEventListener('message', this.onMessageFromIframe.bind(this));
+        this.iframe.src = url;
+        document.body.appendChild(this.iframe);
+    }
+
+    play(buf:ArrayBuffer) {
+        this.worker.postMessage({command:'play', smf:buf});
+    }
+
+    stop() {
+        this.worker.postMessage({command:'stop'});
+    }
+
+    private onMessageFromWorker(evt: MessageEvent) {
+        this.iframe.contentWindow.postMessage(evt.data, '*');
+    }
+
+    private onMessageFromIframe(evt: MessageEvent) {
+        this.worker.postMessage(evt.data);
     }
 }
 

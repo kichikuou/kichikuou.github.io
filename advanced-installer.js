@@ -44,6 +44,7 @@ var AdvancedInstallerView = (function () {
     function AdvancedInstallerView() {
         var _this = this;
         this.files = [];
+        this.hasMidi = false;
         this.host = new AdvancedInstallerHost(this);
         isInstalled().then(function (installed) {
             if (installed)
@@ -59,6 +60,8 @@ var AdvancedInstallerView = (function () {
     };
     AdvancedInstallerView.prototype.onComplete = function () {
         this.setState('installed');
+        if (this.hasMidi)
+            localStorage.setItem('midi', 'https://kichikuou.github.io/sf2synth.js/wml.html');
     };
     AdvancedInstallerView.prototype.onUninstallComplete = function () {
         this.setState('uninstalled');
@@ -97,6 +100,9 @@ var AdvancedInstallerView = (function () {
             if (files[i].name.toLowerCase().endsWith('sa.ald')) {
                 $('#install').classList.remove('pure-button-disabled');
                 $('#install').addEventListener('click', this.handleInstall.bind(this));
+            }
+            else if (files[i].name.toLowerCase().endsWith('ma.ald')) {
+                this.hasMidi = true;
             }
         }
     };

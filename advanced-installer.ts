@@ -48,6 +48,7 @@ class AdvancedInstallerView {
     private host:AdvancedInstallerHost;
     private state:HTMLElement;
     private files: File[] = [];
+    private hasMidi = false;
 
     constructor() {
         this.host = new AdvancedInstallerHost(this);
@@ -67,6 +68,8 @@ class AdvancedInstallerView {
 
     onComplete() {
         this.setState('installed');
+        if (this.hasMidi)
+            localStorage.setItem('midi', 'https://kichikuou.github.io/sf2synth.js/wml.html');
     }
 
     onUninstallComplete() {
@@ -111,6 +114,8 @@ class AdvancedInstallerView {
             if (files[i].name.toLowerCase().endsWith('sa.ald')) {
                 $('#install').classList.remove('pure-button-disabled');
                 $('#install').addEventListener('click', this.handleInstall.bind(this));
+            } else if (files[i].name.toLowerCase().endsWith('ma.ald')) {
+                this.hasMidi = true;
             }
         }
     }

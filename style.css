@@ -113,6 +113,12 @@ body {
     box-shadow: none;
 }
 
+body > iframe {
+    width: 1px;
+    height: 1px;
+    visibility: hidden;
+}
+
 /*** tools.html ***/
 #uploadResult {
     color: red;

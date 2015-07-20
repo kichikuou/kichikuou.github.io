@@ -3,7 +3,10 @@ var XSystem35 = (function () {
         isInstalled().then(this.init.bind(this), function () { return show($('.unsupported')); });
         this.naclModule = $('#nacl_module');
         this.zoom = new ZoomManager();
+        this.webMidiLinkUrl = localStorage.getItem('midi');
         var naclArgs = [];
+        if (this.webMidiLinkUrl)
+            naclArgs.push('-Mn');
         if (localStorage.getItem('antialias'))
             naclArgs.push('-antialias');
         var ppapiSimpleVerbosity = '2';
@@ -49,6 +52,8 @@ var XSystem35 = (function () {
     XSystem35.prototype.moduleDidLoad = function () {
         this.updateStatus('　');
         this.zoom.init();
+        if (this.webMidiLinkUrl)
+            this.midiPlayer = new MidiPlayer(this.webMidiLinkUrl);
     };
     XSystem35.prototype.handleMessage = function (message) {
         var data = message.data;
@@ -75,6 +80,12 @@ var XSystem35 = (function () {
                 break;
             case 'cd_getposition':
                 this.reply(data, this.audio.getPosition());
+                break;
+            case 'midi_start':
+                this.midiPlayer.play(data.data);
+                break;
+            case 'midi_stop':
+                this.midiPlayer.stop();
                 break;
             default:
                 if (typeof data === 'string') {
@@ -293,5 +304,28 @@ var AudioPlayer = (function () {
         return this.bgmDir + (this.tracks[n] || 'track' + n + '.wav');
     };
     return AudioPlayer;
+})();
+var MidiPlayer = (function () {
+    function MidiPlayer(url) {
+        this.worker = new Worker('midi-worker.js');
+        this.iframe = document.createElement('iframe');
+        this.worker.addEventListener('message', this.onMessageFromWorker.bind(this));
+        window.addEventListener('message', this.onMessageFromIframe.bind(this));
+        this.iframe.src = url;
+        document.body.appendChild(this.iframe);
+    }
+    MidiPlayer.prototype.play = function (buf) {
+        this.worker.postMessage({ command: 'play', smf: buf });
+    };
+    MidiPlayer.prototype.stop = function () {
+        this.worker.postMessage({ command: 'stop' });
+    };
+    MidiPlayer.prototype.onMessageFromWorker = function (evt) {
+        this.iframe.contentWindow.postMessage(evt.data, '*');
+    };
+    MidiPlayer.prototype.onMessageFromIframe = function (evt) {
+        this.worker.postMessage(evt.data);
+    };
+    return MidiPlayer;
 })();
 var xsystem35 = new XSystem35;
