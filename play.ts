@@ -79,16 +79,16 @@ class XSystem35 {
         case 'set_window_size':
             this.zoom.setWindowSize(data.width, data.height);
             break;
-        case 'cd_play':
-            this.audio.play(data.track, data.loop);
+        case 'set_caption':
+            this.setCaption(data.caption);
             break;
         case 'cd_play':
             this.audio.play(data.track, data.loop);
             break;
-        case  'cd_stop':
+        case 'cd_stop':
             this.audio.stop();
             break;
-        case  'cd_getposition':
+        case 'cd_getposition':
             this.reply(data, this.audio.getPosition());
             break;
         default:
@@ -121,6 +121,12 @@ class XSystem35 {
 
     private updateStatus(status:string) {
         $('.pnacl-status').textContent = status;
+    }
+
+    private setCaption(buf:ArrayBuffer) {
+        var decoder = new TextDecoder('euc-jp');
+        var s = decoder.decode(new DataView(buf));
+        $('title').textContent = s.slice(s.indexOf(':')+1) + ' - 鬼畜王 on Chrome';
     }
 }
 
