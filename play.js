@@ -58,6 +58,9 @@ var XSystem35 = (function () {
                 hide($('#contents'));
                 setTimeout(function () { return show($('#contents')); }, 3000);
                 break;
+            case 'localtime':
+                this.reply(data, this.localtime(data.time));
+                break;
             case 'set_window_size':
                 this.zoom.setWindowSize(data.width, data.height);
                 break;
@@ -100,6 +103,11 @@ var XSystem35 = (function () {
     };
     XSystem35.prototype.updateStatus = function (status) {
         $('.pnacl-status').textContent = status;
+    };
+    XSystem35.prototype.localtime = function (time_t) {
+        var t = new Date(time_t * 1000);
+        return [t.getSeconds(), t.getMinutes(), t.getHours(),
+            t.getDate(), t.getMonth(), t.getFullYear() - 1900, t.getDay()];
     };
     XSystem35.prototype.setCaption = function (buf) {
         var decoder = new TextDecoder('euc-jp');

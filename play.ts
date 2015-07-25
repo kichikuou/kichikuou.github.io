@@ -76,6 +76,9 @@ class XSystem35 {
             hide($('#contents'));
             setTimeout(() => show($('#contents')), 3000);
             break;
+        case 'localtime':
+            this.reply(data, this.localtime(data.time));
+            break;
         case 'set_window_size':
             this.zoom.setWindowSize(data.width, data.height);
             break;
@@ -121,6 +124,12 @@ class XSystem35 {
 
     private updateStatus(status:string) {
         $('.pnacl-status').textContent = status;
+    }
+
+    private localtime(time_t:number): number[] {
+        var t = new Date(time_t * 1000);
+        return [t.getSeconds(), t.getMinutes(), t.getHours(),
+                t.getDate(), t.getMonth(), t.getFullYear() - 1900, t.getDay()];
     }
 
     private setCaption(buf:ArrayBuffer) {
