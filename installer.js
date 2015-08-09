@@ -74,6 +74,9 @@ var InstallerHost = (function () {
                     this.send({ command: 'setFile', file: f });
                 }
                 break;
+            case 'error':
+                view.onError(evt.data.message);
+                break;
         }
     };
     InstallerHost.prototype.onError = function (evt) {
@@ -108,6 +111,10 @@ var InstallerView = (function () {
     };
     InstallerView.prototype.onUninstallComplete = function () {
         this.setState('uninstalled');
+    };
+    InstallerView.prototype.onError = function (message) {
+        $('.install-failed').textContent = message;
+        this.setState('install-failed');
     };
     InstallerView.prototype.setState = function (state) {
         var newState = $('.' + state);

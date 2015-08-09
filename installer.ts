@@ -84,6 +84,9 @@ class InstallerHost {
             for (var f of this.files)
                 this.send({command:'setFile', file:f});
             break;
+        case 'error':
+            view.onError(evt.data.message);
+            break;
         }
     }
 
@@ -125,6 +128,11 @@ class InstallerView {
 
     onUninstallComplete() {
         this.setState('uninstalled');
+    }
+
+    onError(message:string) {
+        $('.install-failed').textContent = message;
+        this.setState('install-failed');
     }
 
     private setState(state:string) {

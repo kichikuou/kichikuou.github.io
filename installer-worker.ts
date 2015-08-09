@@ -240,11 +240,19 @@ class Installer {
                 var grGenerator = new GameResourceGenerator();
 
                 var gamedata = isofs.getDirEnt('gamedata', isofs.rootDir());
+                if (!gamedata) {
+                    postMessage({command:'error', message:'インストールできません。GAMEDATAフォルダが見つかりません。'});
+                    return;
+                }
                 for (var e of isofs.readDir(gamedata)) {
                     if (e.name.toLowerCase().endsWith('.ald')) {
                         this.copyFile(e, localfs.root, isofs);
                         grGenerator.addFile(e.name.toLowerCase());
                     }
+                }
+                if (grGenerator.isEmpty()) {
+                    postMessage({command:'error', message:'インストールできません。System3.xのゲームではありません。'});
+                    return;
                 }
                 grGenerator.generate(localfs.root);
             } else {
@@ -291,6 +299,10 @@ class GameResourceGenerator {
         var writer = dstDir.getFile('xsystem35.gr', {create:true}).createWriter();
         writer.truncate(0);
         writer.write(new Blob([this.lines.join('\n') + '\n']));
+    }
+
+    isEmpty(): boolean {
+        return this.lines.length == 0;
     }
 }
 

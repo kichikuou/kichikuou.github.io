@@ -241,12 +241,20 @@ var Installer = (function () {
                 var isofs = new ISO9660FileSystem(new SectorReader(this.imgFile));
                 var grGenerator = new GameResourceGenerator();
                 var gamedata = isofs.getDirEnt('gamedata', isofs.rootDir());
+                if (!gamedata) {
+                    postMessage({ command: 'error', message: 'インストールできません。GAMEDATAフォルダが見つかりません。' });
+                    return;
+                }
                 for (var _i = 0, _a = isofs.readDir(gamedata); _i < _a.length; _i++) {
                     var e = _a[_i];
                     if (e.name.toLowerCase().endsWith('.ald')) {
                         this.copyFile(e, localfs.root, isofs);
                         grGenerator.addFile(e.name.toLowerCase());
                     }
+                }
+                if (grGenerator.isEmpty()) {
+                    postMessage({ command: 'error', message: 'インストールできません。System3.xのゲームではありません。' });
+                    return;
                 }
                 grGenerator.generate(localfs.root);
             }
@@ -291,6 +299,9 @@ var GameResourceGenerator = (function () {
         var writer = dstDir.getFile('xsystem35.gr', { create: true }).createWriter();
         writer.truncate(0);
         writer.write(new Blob([this.lines.join('\n') + '\n']));
+    };
+    GameResourceGenerator.prototype.isEmpty = function () {
+        return this.lines.length == 0;
     };
     GameResourceGenerator.resourceType = { s: 'Scenario', g: 'Graphics', w: 'Wave', d: 'Data', r: 'Resource', m: 'Midi' };
     return GameResourceGenerator;

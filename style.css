@@ -77,6 +77,10 @@ body {
     content: " (未選択)";
 }
 
+.install-failed {
+    color: red;
+}
+
 #preload {
     visibility: hidden;
 }
