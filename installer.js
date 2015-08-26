@@ -109,9 +109,11 @@ var InstallerView = (function () {
         $('#progressBar').value = value;
     };
     InstallerView.prototype.onComplete = function () {
+        ga('send', 'event', 'installer', 'installed');
         this.setState('installed');
     };
     InstallerView.prototype.onUninstallComplete = function () {
+        ga('send', 'event', 'installer', 'uninstalled');
         this.setState('uninstalled');
     };
     InstallerView.prototype.onError = function (message) {

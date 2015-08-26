@@ -1,4 +1,5 @@
 var $: (selector:string)=>HTMLElement = document.querySelector.bind(document);
+declare function ga(command:string, type:string, category:string, action:string, label?:string, value?:number): void;
 
 function show(elem:HTMLElement) {
     elem.classList.remove('hidden');

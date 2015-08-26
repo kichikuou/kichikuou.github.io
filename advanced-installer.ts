@@ -67,12 +67,14 @@ class AdvancedInstallerView {
     }
 
     onComplete() {
+        ga('send', 'event', 'advanced-installer', 'installed');
         this.setState('installed');
         if (this.hasMidi)
             localStorage.setItem('midi', 'https://kichikuou.github.io/sf2synth.js/wml.html');
     }
 
     onUninstallComplete() {
+        ga('send', 'event', 'advanced-installer', 'uninstalled');
         this.setState('uninstalled');
     }
 

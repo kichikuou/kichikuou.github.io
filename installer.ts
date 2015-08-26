@@ -125,10 +125,12 @@ class InstallerView {
     }
 
     onComplete() {
+        ga('send', 'event', 'installer', 'installed');
         this.setState('installed');
     }
 
     onUninstallComplete() {
+        ga('send', 'event', 'installer', 'uninstalled');
         this.setState('uninstalled');
     }
 

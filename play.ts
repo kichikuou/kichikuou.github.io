@@ -148,7 +148,9 @@ class XSystem35 {
     private setCaption(buf:ArrayBuffer) {
         var decoder = new TextDecoder('euc-jp');
         var s = decoder.decode(new DataView(buf));
-        $('title').textContent = s.slice(s.indexOf(':')+1) + ' - 鬼畜王 on Chrome';
+        var title = s.slice(s.indexOf(':')+1);
+        ga('send', 'event', 'play', 'gamestart', title);
+        $('title').textContent = title + ' - 鬼畜王 on Chrome';
     }
 }
 
