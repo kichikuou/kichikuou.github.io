@@ -10,8 +10,8 @@ var ToolsHost = (function () {
     ToolsHost.prototype.downloadSaveData = function () {
         this.worker.postMessage({ command: 'downloadSaveData' });
     };
-    ToolsHost.prototype.uploadSaveData = function (file) {
-        this.worker.postMessage({ command: 'uploadSaveData', file: file });
+    ToolsHost.prototype.uploadSaveData = function (files) {
+        this.worker.postMessage({ command: 'uploadSaveData', files: files });
     };
     ToolsHost.prototype.onMessage = function (evt) {
         switch (evt.data.command) {
@@ -45,6 +45,9 @@ var ToolsView = (function () {
         }, function () { return show($('.unsupported')); });
         $('#downloadSaveData').addEventListener('click', this.handleDownloadSaveData.bind(this));
         $('#uploadSaveData').addEventListener('click', this.handleUploadSaveData.bind(this));
+        document.body.addEventListener('dragover', dropEffect('none'));
+        $('.saveDataManager').addEventListener('dragover', dropEffect('copy'));
+        $('.saveDataManager').addEventListener('drop', this.handleDropSaveData.bind(this));
         $('#antialias').addEventListener('change', this.handleAntialiasChange.bind(this));
         if (localStorage.getItem('antialias'))
             $('#antialias').checked = true;
@@ -70,9 +73,14 @@ var ToolsView = (function () {
         var input = document.createElement('input');
         input.type = 'file';
         input.addEventListener('change', function (evt) {
-            toolsHost.uploadSaveData(input.files[0]);
+            toolsHost.uploadSaveData(input.files);
         });
         input.click();
+    };
+    ToolsView.prototype.handleDropSaveData = function (evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+        toolsHost.uploadSaveData(evt.dataTransfer.files);
     };
     ToolsView.prototype.handleAntialiasChange = function (evt) {
         if (evt.target.checked)
@@ -82,5 +90,12 @@ var ToolsView = (function () {
     };
     return ToolsView;
 })();
+function dropEffect(effect) {
+    return function (evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+        evt.dataTransfer.dropEffect = effect;
+    };
+}
 var toolsHost = new ToolsHost();
 var toolsView = new ToolsView();

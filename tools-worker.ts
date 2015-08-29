@@ -40,6 +40,7 @@ function extractSaveData(file:File):boolean {
     for (var f of files) {
         tempdir.getFile(basename(f.name), {create:true})
             .createWriter().write(new Blob([f.asArrayBuffer()]));
+        console.log(f.name);
     }
 
     try {
@@ -50,11 +51,30 @@ function extractSaveData(file:File):boolean {
     return true;
 }
 
-function uploadSaveData(file:File) {
-    var success = false;
+function copySaveData(file:File):boolean {
+    var fsroot = self.webkitRequestFileSystemSync(self.PERSISTENT, 0).root;
+    var saveDir = fsroot.getDirectory('save', {create:true});
+    var writer = saveDir.getFile(file.name.toLowerCase(), {create:true}).createWriter();
+    writer.truncate(0);
+    writer.write(file);
+    console.log(file.name.toLowerCase());
+    return true;
+}
+
+function uploadSaveData(files:FileList) {
+    var success = true;
     try {
-        success = extractSaveData(file);
+        for (var i = 0; i < files.length; i++) {
+            var fname = files[i].name.toLowerCase();
+            if (fname.endsWith('.zip'))
+                success = extractSaveData(files[i]) && success;
+            else if (fname.endsWith('.asd'))
+                success = copySaveData(files[i]) && success;
+            else
+                success = false;
+        }
     } catch (e) {
+        success = false;
         console.log(e);
     }
     postMessage({command:'uploadSaveData', success:success});
@@ -69,7 +89,7 @@ addEventListener('message', function(evt: MessageEvent) {
         downloadSaveData();
         break;
     case 'uploadSaveData':
-        uploadSaveData(evt.data.file);
+        uploadSaveData(evt.data.files);
         break;
     }
 });

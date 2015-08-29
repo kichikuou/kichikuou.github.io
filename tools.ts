@@ -15,8 +15,8 @@ class ToolsHost {
         this.worker.postMessage({command:'downloadSaveData'});
     }
 
-    uploadSaveData(file:File) {
-        this.worker.postMessage({command:'uploadSaveData', file:file});
+    uploadSaveData(files:FileList) {
+        this.worker.postMessage({command:'uploadSaveData', files:files});
     }
 
     private onMessage(evt: MessageEvent) {
@@ -52,6 +52,9 @@ class ToolsView {
 
         $('#downloadSaveData').addEventListener('click', this.handleDownloadSaveData.bind(this));
         $('#uploadSaveData').addEventListener('click', this.handleUploadSaveData.bind(this));
+        document.body.addEventListener('dragover', dropEffect('none'));
+        $('.saveDataManager').addEventListener('dragover', dropEffect('copy'));
+        $('.saveDataManager').addEventListener('drop', this.handleDropSaveData.bind(this));
         $('#antialias').addEventListener('change', this.handleAntialiasChange.bind(this));
         if (localStorage.getItem('antialias'))
             (<HTMLInputElement>$('#antialias')).checked = true;
@@ -82,9 +85,15 @@ class ToolsView {
         var input = document.createElement('input');
         input.type = 'file';
         input.addEventListener('change', (evt:Event) => {
-            toolsHost.uploadSaveData(input.files[0]);
+            toolsHost.uploadSaveData(input.files);
         });
         input.click();
+    }
+
+    private handleDropSaveData(evt:DragEvent) {
+        evt.stopPropagation();
+        evt.preventDefault();
+        toolsHost.uploadSaveData(evt.dataTransfer.files);
     }
 
     private handleAntialiasChange(evt:Event) {
@@ -92,6 +101,14 @@ class ToolsView {
             localStorage.setItem('antialias', 'true');
         else
             localStorage.removeItem('antialias');
+    }
+}
+
+function dropEffect(effect:string) {
+    return function(evt:DragEvent) {
+        evt.stopPropagation();
+        evt.preventDefault();
+        evt.dataTransfer.dropEffect = effect;
     }
 }
 
