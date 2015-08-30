@@ -87,6 +87,12 @@ var XSystem35 = (function () {
             case 'midi_stop':
                 this.midiPlayer.stop();
                 break;
+            case 'input_string':
+                this.inputString(data);
+                break;
+            case 'input_number':
+                this.inputNumber(data);
+                break;
             default:
                 if (typeof data === 'string') {
                     console.log(data);
@@ -126,6 +132,29 @@ var XSystem35 = (function () {
         var title = s.slice(s.indexOf(':') + 1);
         ga('send', 'event', 'play', 'gamestart', title);
         $('title').textContent = title + ' - 鬼畜王 on Chrome';
+    };
+    XSystem35.prototype.inputString = function (data) {
+        var decoder = new TextDecoder('euc-jp');
+        var title = decoder.decode(new DataView(data.title)) + ' (全角' + data.maxlen + '文字まで)';
+        var oldstring = decoder.decode(new DataView(data.oldstring));
+        var newstring = window.prompt(title, oldstring);
+        if (newstring) {
+            var encoder = new EucjpEncoder();
+            var buf = encoder.encode(newstring.substr(0, data.maxlen));
+            this.reply(data, buf || data.oldstring);
+        }
+        else {
+            this.reply(data, data.oldstring);
+        }
+    };
+    XSystem35.prototype.inputNumber = function (data) {
+        var decoder = new TextDecoder('euc-jp');
+        var title = decoder.decode(new DataView(data.title)) + ' [' + data.min + '-' + data.max + ']';
+        var result = window.prompt(title, data.default + '');
+        if (result)
+            this.reply(data, parseInt(result));
+        else
+            this.reply(data, data.default);
     };
     return XSystem35;
 })();
@@ -329,5 +358,40 @@ var MidiPlayer = (function () {
         this.worker.postMessage(evt.data);
     };
     return MidiPlayer;
+})();
+var EucjpEncoder = (function () {
+    function EucjpEncoder() {
+        if (!EucjpEncoder.table)
+            this.generateTable();
+    }
+    EucjpEncoder.prototype.encode = function (s) {
+        var bytes = [];
+        for (var i = 0; i < s.length; i++) {
+            var euc = EucjpEncoder.table[s.charAt(i)];
+            if (euc) {
+                bytes.push(euc >> 8);
+                bytes.push(euc & 0xff);
+            }
+            else {
+                return null;
+            }
+        }
+        return new Uint8Array(bytes).buffer;
+    };
+    EucjpEncoder.prototype.generateTable = function () {
+        EucjpEncoder.table = {};
+        var decoder = new TextDecoder('euc-jp');
+        var buf = new Uint8Array(2);
+        for (var c1 = 0xa1; c1 <= 0xfc; c1++) {
+            buf[0] = c1;
+            for (var c2 = 0xa1; c2 <= 0xfe; c2++) {
+                buf[1] = c2;
+                var s = decoder.decode(buf);
+                if (s.length == 1 && s != '\uFFFD')
+                    EucjpEncoder.table[s] = (c1 << 8) | c2;
+            }
+        }
+    };
+    return EucjpEncoder;
 })();
 var xsystem35 = new XSystem35;
