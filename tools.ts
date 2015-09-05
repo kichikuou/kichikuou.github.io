@@ -69,9 +69,11 @@ class ToolsView {
         elem.setAttribute('download', 'savedata.zip');
         elem.setAttribute('href', URL.createObjectURL(blob));
         elem.click();
+        ga('send', 'event', 'tools', 'download-savedata');
     }
 
     uploadSaveDataDone(success:boolean) {
+        ga('send', 'event', 'tools', 'restore-savedata', success ? 'ok' : 'fail');
         $('#uploadResult').textContent = success ? '成功しました。' : 'セーブデータを復元できませんでした。';
         if (success)
             this.saveDataFound();

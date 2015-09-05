@@ -129,6 +129,7 @@ class XSystem35 {
     }
 
     private handleCrash(event:Event) {
+        ga('send', 'event', 'play', 'crashed', this.naclModule.exitStatus + '');
         if (this.naclModule.exitStatus == -1)
             this.updateStatus('CRASHED');
         else

@@ -108,6 +108,7 @@ var XSystem35 = (function () {
         this.updateStatus('ERROR: ' + this.naclModule.lastError);
     };
     XSystem35.prototype.handleCrash = function (event) {
+        ga('send', 'event', 'play', 'crashed', this.naclModule.exitStatus + '');
         if (this.naclModule.exitStatus == -1)
             this.updateStatus('CRASHED');
         else

@@ -81,6 +81,15 @@ body {
     color: red;
 }
 
+.link-to-advanced-installer {
+    text-align: right;
+}
+
+.link-to-advanced-installer a {
+    font-size: small;
+    color: #808080;
+}
+
 #preload {
     visibility: hidden;
 }
