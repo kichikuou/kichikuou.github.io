@@ -22,12 +22,17 @@ var Installer = (function () {
         }
     };
     Installer.prototype.setFile = function (file) {
-        if (file.name.toLowerCase().endsWith('.img'))
+        var name = file.name.toLowerCase();
+        if (name.endsWith('.img') || name.endsWith('.mdf'))
             this.imgFile = file;
-        else if (file.name.toLowerCase().endsWith('.cue'))
+        else if (name.endsWith('.cue') || name.endsWith('.mds'))
             this.cueFile = file;
-        if (this.imgFile && this.cueFile)
-            this.imageReader = new ImgCueReader(this.imgFile, this.cueFile);
+        if (this.imgFile && this.cueFile) {
+            if (this.cueFile.name.endsWith('.cue'))
+                this.imageReader = new ImgCueReader(this.imgFile, this.cueFile);
+            else
+                this.imageReader = new MdfMdsReader(this.imgFile, this.cueFile);
+        }
     };
     Installer.prototype.ready = function () {
         return !!this.imageReader;
@@ -57,7 +62,7 @@ var Installer = (function () {
                 grGenerator.generate(localfs.root);
             }
             else {
-                this.imageReader.extractTrack(this.imgFile, track, localfs.root);
+                this.imageReader.extractTrack(track, localfs.root);
             }
             postMessage({ command: 'progress', value: track, max: this.imageReader.maxTrack() });
         }

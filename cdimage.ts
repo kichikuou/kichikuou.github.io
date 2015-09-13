@@ -89,36 +89,54 @@ class DirEnt {
 interface CDImageReader {
     readSector(sector:number): ArrayBuffer;
     readSequentialSectors(startSector: number, length: number, callback:(data:ArrayBufferView[])=>void): void;
+    maxTrack(): number;
+    extractTrack(track:number, dstDir:DirectoryEntrySync): void;
 }
 
-class ImgCueReader implements CDImageReader {
+class ImageReaderBase {
+    constructor(public image:File) {}
+
+    readSequential(startOffset:number,
+                   bytesToRead:number,
+                   blockSize:number,
+                   sectorSize:number,
+                   sectorOffset:number,
+                   callback:(data:ArrayBufferView[])=>void) {
+        var sectors = Math.ceil(bytesToRead / sectorSize);
+        var chunk = 256;
+        var reader = new FileReaderSync();
+        while (sectors > 0) {
+            var n = Math.min(chunk, sectors);
+            var blob = this.image.slice(startOffset, startOffset + n * blockSize);
+            var buf = reader.readAsArrayBuffer(blob);
+            var bufs:ArrayBufferView[] = [];
+            for (var i = 0; i < n; i++) {
+                bufs.push(new DataView(buf, i * blockSize + sectorOffset, Math.min(bytesToRead, sectorSize)));
+                bytesToRead -= sectorSize;
+            }
+            callback(bufs);
+            sectors -= n;
+            startOffset += n * blockSize;
+        }
+    }
+}
+
+class ImgCueReader extends ImageReaderBase implements CDImageReader {
     private tracks:{ type:string; index:string[]; }[];
 
-    constructor(private img:File, cue:File) {
+    constructor(img:File, cue:File) {
+        super(img);
         this.parseCue(cue);
     }
 
     readSector(sector:number): ArrayBuffer {
         var start = sector * 2352 + 16;
         var end = start + 2048;
-        return new FileReaderSync().readAsArrayBuffer(this.img.slice(start, end));
+        return new FileReaderSync().readAsArrayBuffer(this.image.slice(start, end));
     }
 
     readSequentialSectors(startSector: number, length: number, callback:(data:ArrayBufferView[])=>void) {
-        var endSector = startSector + ((length + 2047) >> 11);
-        var chunk = 256;
-        var reader = new FileReaderSync();
-        for (var sector = startSector; sector < endSector; sector += chunk) {
-            var n = Math.min(chunk, endSector - sector);
-            var blob = this.img.slice(sector * 2352, (sector + n) * 2352);
-            var buf = reader.readAsArrayBuffer(blob);
-            var bufs:ArrayBufferView[] = [];
-            for (var i = 0; i < n; i++) {
-                bufs.push(new DataView(buf, i * 2352 + 16, Math.min(length, 2048)));
-                length -= 2048;
-            }
-            callback(bufs);
-        }
+        this.readSequential(startSector * 2352, length, 2352, 2048, 16, callback);
     }
 
     private parseCue(cueFile:File) {
@@ -144,7 +162,7 @@ class ImgCueReader implements CDImageReader {
         return this.tracks.length - 1;
     }
 
-    extractTrack(imgFile:File, track:number, dstDir:DirectoryEntrySync) {
+    extractTrack(track:number, dstDir:DirectoryEntrySync) {
         if (!this.tracks[track] || this.tracks[track].type != 'AUDIO')
             return;
 
@@ -155,7 +173,7 @@ class ImgCueReader implements CDImageReader {
             var index = this.tracks[track+1].index[0] || this.tracks[track+1].index[1];
             end = this.indexToSector(index) * 2352;
         } else {
-            end = imgFile.size;
+            end = this.image.size;
         }
 
         var dstName = 'track' + track + '.wav';
@@ -166,14 +184,14 @@ class ImgCueReader implements CDImageReader {
         }
         var writer = dstFile.createWriter();
         writer.truncate(0);
-        writer.write(new Blob([this.createWaveHeader(end - start)]));
+        writer.write(new Blob([createWaveHeader(end - start)]));
 
         var reader = new FileReaderSync();
         var chunk = 1024*1024;
         while (start < end) {
             var size = Math.min(chunk, end - start);
             try {
-                var data = reader.readAsArrayBuffer(imgFile.slice(start, start + size));
+                var data = reader.readAsArrayBuffer(this.image.slice(start, start + size));
                 writer.write(new Blob([data]));
                 start += size;
             } catch (e) {
@@ -189,23 +207,100 @@ class ImgCueReader implements CDImageReader {
         var msf = index.split(':').map(Number);
         return msf[0]*60*75 + msf[1]*75 + msf[2];
     }
+}
 
-    private createWaveHeader(size:number):ArrayBuffer {
-        var buf = new ArrayBuffer(44);
-        var view = new DataView(buf);
-        view.setUint32(0, 0x52494646, false); // 'RIFF'
-        view.setUint32(4, size + 36, true); // filesize - 8
-        view.setUint32(8, 0x57415645, false); // 'WAVE'
-        view.setUint32(12, 0x666D7420, false); // 'fmt '
-        view.setUint32(16, 16, true); // size of fmt chunk
-        view.setUint16(20, 1, true); // PCM format
-        view.setUint16(22, 2, true); // stereo
-        view.setUint32(24, 44100, true); // sampling rate
-        view.setUint32(28, 176400, true); // bytes/sec
-        view.setUint16(32, 4, true); // block size
-        view.setUint16(34, 16, true); // bit/sample
-        view.setUint32(36, 0x64617461, false); // 'data'
-        view.setUint32(40, size, true); // data size
-        return buf;
+enum MdsTrackMode { Audio = 0xa9, Mode1 = 0xaa };
+
+class MdfMdsReader extends ImageReaderBase implements CDImageReader {
+    private tracks:{ mode:number; sectorSize:number; offset:number; sectors:number; }[];
+
+    constructor(mdf:File, mds:File) {
+        super(mdf);
+        this.parseMds(mds);
     }
+
+    private parseMds(mdsFile:File) {
+        var buf = new FileReaderSync().readAsArrayBuffer(mdsFile);
+
+        var signature = new TextDecoder().decode(new DataView(buf, 0, 16));
+        if (signature != 'MEDIA DESCRIPTOR')
+            throw mdsFile.name + ': not a mds file';
+
+        var header = new DataView(buf, 0, 0x70);
+        var entries = header.getUint8(0x62);
+
+        this.tracks = [];
+        for (var i = 0; i < entries; i++) {
+            var trackData = new DataView(buf, 0x70 + i * 0x50, 0x50);
+            var extraData = new DataView(buf, 0x70 + entries * 0x50 + i * 8, 8);
+            var mode = trackData.getUint8(0x00);
+            var track = trackData.getUint8(0x04);
+            var sectorSize = trackData.getUint16(0x10, true);
+            var offset = trackData.getUint32(0x28, true); // >4GB offset is not supported.
+            var sectors = extraData.getUint32(0x4, true);
+            if (track < 100)
+                this.tracks[track] = {mode:mode, sectorSize:sectorSize, offset:offset, sectors:sectors};
+        }
+        if (this.tracks[1].mode != MdsTrackMode.Mode1)
+            throw 'track 1 is not mode1';
+    }
+
+    readSector(sector:number): ArrayBuffer {
+        var start = sector * this.tracks[1].sectorSize + 16;
+        var end = start + 2048;
+        return new FileReaderSync().readAsArrayBuffer(this.image.slice(start, end));
+    }
+
+    readSequentialSectors(startSector: number, length: number, callback:(data:ArrayBufferView[])=>void) {
+        var track = this.tracks[1];
+        this.readSequential(track.offset + startSector * track.sectorSize, length, track.sectorSize, 2048, 16, callback);
+    }
+
+    maxTrack():number {
+        return this.tracks.length - 1;
+    }
+
+    extractTrack(track:number, dstDir:DirectoryEntrySync) {
+        if (!this.tracks[track] || this.tracks[track].mode != MdsTrackMode.Audio)
+            return;
+
+        var startTime = performance.now();
+        var size = this.tracks[track].sectors * 2352;
+
+        var dstName = 'track' + track + '.wav';
+        var dstFile = dstDir.getFile(dstName, {create:true});
+        if (dstFile.getMetadata().size - 44 == size) {
+            console.log(dstName + ': skipped');
+            return;
+        }
+        var writer = dstFile.createWriter();
+        writer.truncate(0);
+        writer.write(new Blob([createWaveHeader(size)]));
+
+        this.readSequential(this.tracks[track].offset, size, this.tracks[track].sectorSize, 2352, 0,
+            buf => {
+                writer.write(new Blob(buf));
+            });
+
+        console.log(dstName, performance.now() - startTime, 'msec');
+    }
+}
+
+function createWaveHeader(size:number):ArrayBuffer {
+    var buf = new ArrayBuffer(44);
+    var view = new DataView(buf);
+    view.setUint32(0, 0x52494646, false); // 'RIFF'
+    view.setUint32(4, size + 36, true); // filesize - 8
+    view.setUint32(8, 0x57415645, false); // 'WAVE'
+    view.setUint32(12, 0x666D7420, false); // 'fmt '
+    view.setUint32(16, 16, true); // size of fmt chunk
+    view.setUint16(20, 1, true); // PCM format
+    view.setUint16(22, 2, true); // stereo
+    view.setUint32(24, 44100, true); // sampling rate
+    view.setUint32(28, 176400, true); // bytes/sec
+    view.setUint16(32, 4, true); // block size
+    view.setUint16(34, 16, true); // bit/sample
+    view.setUint32(36, 0x64617461, false); // 'data'
+    view.setUint32(40, size, true); // data size
+    return buf;
 }
