@@ -7,7 +7,9 @@ var Installer = (function () {
         switch (evt.data.command) {
             case 'setFile':
                 this.setFile(evt.data.file);
-                postMessage({ command: 'readyState', imgReady: !!this.imgFile, cueReady: !!this.cueFile });
+                var imgName = this.imgFile && this.imgFile.name;
+                var cueName = this.cueFile && this.cueFile.name;
+                postMessage({ command: 'readyState', img: imgName, cue: cueName });
                 break;
             case 'install':
                 if (this.ready())

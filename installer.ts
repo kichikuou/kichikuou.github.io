@@ -56,8 +56,8 @@ class InstallerHost {
     private onMessage(evt: MessageEvent) {
         switch (evt.data.command) {
         case 'readyState':
-            this.view.setReadyState(evt.data.imgReady, evt.data.cueReady);
-            if (evt.data.imgReady && evt.data.cueReady)
+            this.view.setReadyState(evt.data.img, evt.data.cue);
+            if (evt.data.img && evt.data.cue)
                 this.startInstall();
             break;
         case 'progress':
@@ -111,11 +111,15 @@ class InstallerView {
         }, () => this.setState('unsupported'));
     }
 
-    setReadyState(imgReady:boolean, cueReady:boolean) {
-        if (imgReady)
+    setReadyState(imgName:string, cueName:string) {
+        if (imgName) {
             $('#imgReady').classList.remove('notready');
-        if (cueReady)
+            $('#imgReady code').textContent = imgName;
+        }
+        if (cueName) {
             $('#cueReady').classList.remove('notready');
+            $('#cueReady code').textContent = cueName;
+        }
     }
 
     setProgress(value:number, max:number) {

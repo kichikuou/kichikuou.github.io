@@ -50,8 +50,8 @@ var InstallerHost = (function () {
         var _this = this;
         switch (evt.data.command) {
             case 'readyState':
-                this.view.setReadyState(evt.data.imgReady, evt.data.cueReady);
-                if (evt.data.imgReady && evt.data.cueReady)
+                this.view.setReadyState(evt.data.img, evt.data.cue);
+                if (evt.data.img && evt.data.cue)
                     this.startInstall();
                 break;
             case 'progress':
@@ -97,11 +97,15 @@ var InstallerView = (function () {
                 _this.setState('files');
         }, function () { return _this.setState('unsupported'); });
     }
-    InstallerView.prototype.setReadyState = function (imgReady, cueReady) {
-        if (imgReady)
+    InstallerView.prototype.setReadyState = function (imgName, cueName) {
+        if (imgName) {
             $('#imgReady').classList.remove('notready');
-        if (cueReady)
+            $('#imgReady code').textContent = imgName;
+        }
+        if (cueName) {
             $('#cueReady').classList.remove('notready');
+            $('#cueReady code').textContent = cueName;
+        }
     };
     InstallerView.prototype.setProgress = function (value, max) {
         this.setState('progress');
