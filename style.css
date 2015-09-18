@@ -99,6 +99,10 @@ dt {
     font-weight: bold;
 }
 
+dd {
+    margin-bottom: 1ex;
+}
+
 /*** play.html ***/
 .bgblack-fade {
     background-color: black;
