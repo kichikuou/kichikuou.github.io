@@ -71,7 +71,6 @@ var Installer = (function () {
         postMessage({ command: 'complete' });
     };
     Installer.prototype.copyFile = function (src, dstDir, isofs) {
-        var startTime = performance.now();
         var dstFile = dstDir.getFile(src.name.toLowerCase(), { create: true });
         var writer = dstFile.createWriter();
         if (dstFile.getMetadata().size == src.size) {
@@ -82,7 +81,7 @@ var Installer = (function () {
         isofs.readFile(src, function (bufs) {
             writer.write(new Blob(bufs));
         });
-        console.log(src.name, performance.now() - startTime, 'msec');
+        console.log(src.name);
     };
     return Installer;
 })();

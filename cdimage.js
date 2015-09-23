@@ -171,7 +171,6 @@ var ImgCueReader = (function (_super) {
     ImgCueReader.prototype.extractTrack = function (track, dstDir) {
         if (!this.tracks[track] || this.tracks[track].type != 'AUDIO')
             return;
-        var startTime = performance.now();
         var start = this.indexToSector(this.tracks[track].index[1]) * 2352;
         var end;
         if (this.tracks[track + 1]) {
@@ -205,7 +204,7 @@ var ImgCueReader = (function (_super) {
                 throw e;
             }
         }
-        console.log(dstName, performance.now() - startTime, 'msec');
+        console.log(dstName);
     };
     ImgCueReader.prototype.indexToSector = function (index) {
         var msf = index.split(':').map(Number);
@@ -262,7 +261,6 @@ var MdfMdsReader = (function (_super) {
     MdfMdsReader.prototype.extractTrack = function (track, dstDir) {
         if (!this.tracks[track] || this.tracks[track].mode != MdsTrackMode.Audio)
             return;
-        var startTime = performance.now();
         var size = this.tracks[track].sectors * 2352;
         var dstName = 'track' + track + '.wav';
         var dstFile = dstDir.getFile(dstName, { create: true });
@@ -276,7 +274,7 @@ var MdfMdsReader = (function (_super) {
         this.readSequential(this.tracks[track].offset, size, this.tracks[track].sectorSize, 2352, 0, function (buf) {
             writer.write(new Blob(buf));
         });
-        console.log(dstName, performance.now() - startTime, 'msec');
+        console.log(dstName);
     };
     return MdfMdsReader;
 })(ImageReaderBase);

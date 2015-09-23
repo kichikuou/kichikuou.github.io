@@ -1,0 +1,27 @@
+{
+    "version": "1.5.0-beta",
+    "compilerOptions": {
+        "target": "es5",
+        "outDir": "..",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "noLib": false,
+        "suppressImplicitAnyIndexErrors": true
+    },
+    "filesGlob": [
+        "./**/*.ts",
+        "./**/*.tsx",
+        "!./typings/*/**/*",
+        "!./node_modules/**/*"
+    ],
+    "files": [
+        "./advanced-installer.ts",
+        "./common.ts",
+        "./es6.d.ts",
+        "./index.ts",
+        "./installer.ts",
+        "./play.ts",
+        "./tools.ts",
+        "./typings/tsd.d.ts"
+    ]
+}

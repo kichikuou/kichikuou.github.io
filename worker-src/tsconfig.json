@@ -1,0 +1,27 @@
+{
+    "version": "1.5.0-beta",
+    "compilerOptions": {
+        "target": "es5",
+        "outDir": "..",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "noLib": true,
+        "suppressImplicitAnyIndexErrors": true
+    },
+    "filesGlob": [
+        "./**/*.ts",
+        "./**/*.tsx",
+        "!./typings/*/**/*",
+        "!./node_modules/**/*"
+    ],
+    "files": [
+        "./cdimage.ts",
+        "./es6.d.ts",
+        "./installer-worker.ts",
+        "./midi-worker.ts",
+        "./tools-worker.ts",
+        "./typings/lib.core.d.ts",
+        "./typings/lib.webworker.d.ts",
+        "./typings/tsd.d.ts"
+    ]
+}

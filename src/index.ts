@@ -1,4 +1,4 @@
-isInstalled().then(function(installed) {
+isInstalled().then(function(installed:boolean) {
     if (installed)
         show($('.installed'));
     else

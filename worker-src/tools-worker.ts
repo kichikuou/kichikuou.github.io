@@ -1,4 +1,3 @@
-declare var self: WorkerGlobalScope;
 importScripts('lib/jszip.min.js');
 
 function saveDataEntries():EntrySync[] {

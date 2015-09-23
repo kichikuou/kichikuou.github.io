@@ -166,7 +166,6 @@ class ImgCueReader extends ImageReaderBase implements CDImageReader {
         if (!this.tracks[track] || this.tracks[track].type != 'AUDIO')
             return;
 
-        var startTime = performance.now();
         var start = this.indexToSector(this.tracks[track].index[1]) * 2352;
         var end:number;
         if (this.tracks[track+1]) {
@@ -200,7 +199,7 @@ class ImgCueReader extends ImageReaderBase implements CDImageReader {
                 throw e;
             }
         }
-        console.log(dstName, performance.now() - startTime, 'msec');
+        console.log(dstName);
     }
 
     private indexToSector(index:string):number {
@@ -264,7 +263,6 @@ class MdfMdsReader extends ImageReaderBase implements CDImageReader {
         if (!this.tracks[track] || this.tracks[track].mode != MdsTrackMode.Audio)
             return;
 
-        var startTime = performance.now();
         var size = this.tracks[track].sectors * 2352;
 
         var dstName = 'track' + track + '.wav';
@@ -282,7 +280,7 @@ class MdfMdsReader extends ImageReaderBase implements CDImageReader {
                 writer.write(new Blob(buf));
             });
 
-        console.log(dstName, performance.now() - startTime, 'msec');
+        console.log(dstName);
     }
 }
 

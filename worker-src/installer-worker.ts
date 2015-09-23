@@ -1,5 +1,3 @@
-declare var self: WorkerGlobalScope;
-
 importScripts('cdimage.js');
 
 class Installer {
@@ -82,7 +80,6 @@ class Installer {
     }
 
     private copyFile(src:DirEnt, dstDir:DirectoryEntrySync, isofs:ISO9660FileSystem) {
-        var startTime = performance.now();
         var dstFile = dstDir.getFile(src.name.toLowerCase(), {create:true});
         var writer = dstFile.createWriter();
         if (dstFile.getMetadata().size == src.size) {
@@ -93,7 +90,7 @@ class Installer {
         isofs.readFile(src, function(bufs:ArrayBufferView[]) {
             writer.write(new Blob(bufs));
         });
-        console.log(src.name, performance.now() - startTime, 'msec');
+        console.log(src.name);
     }
 }
 

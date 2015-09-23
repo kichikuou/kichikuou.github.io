@@ -1,4 +1,3 @@
-declare var self: WorkerGlobalScope;
 importScripts('lib/smfplayer.min.js');
 
 namespace SMF {
