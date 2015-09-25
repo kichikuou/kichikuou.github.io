@@ -57,7 +57,6 @@ class XSystem35 {
         show($('#contents'));
         document.body.classList.add('bgblack-fade');
         var listener = $('#contents');
-        listener.addEventListener('loadstart', this.onLoadStart.bind(this), true);
         listener.addEventListener('progress', this.onLoadProgress.bind(this), true);
         listener.addEventListener('load', this.moduleDidLoad.bind(this), true);
         listener.addEventListener('message', this.handleMessage.bind(this), true);
@@ -67,10 +66,6 @@ class XSystem35 {
 
         requestFileSystem().then(
             (fs) => this.audio = new AudioPlayer(fs.root.toURL()));
-    }
-
-    private onLoadStart() {
-        this.updateStatus('Loading...');
     }
 
     private onLoadProgress(e:{lengthComputable:boolean, loaded:number, total:number}) {
