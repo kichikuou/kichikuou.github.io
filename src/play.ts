@@ -57,6 +57,8 @@ class XSystem35 {
         show($('#contents'));
         document.body.classList.add('bgblack-fade');
         var listener = $('#contents');
+        listener.addEventListener('loadstart', this.onLoadStart.bind(this), true);
+        listener.addEventListener('progress', this.onLoadProgress.bind(this), true);
         listener.addEventListener('load', this.moduleDidLoad.bind(this), true);
         listener.addEventListener('message', this.handleMessage.bind(this), true);
         listener.addEventListener('error', this.handleError.bind(this), true);
@@ -67,8 +69,22 @@ class XSystem35 {
             (fs) => this.audio = new AudioPlayer(fs.root.toURL()));
     }
 
+    private onLoadStart() {
+        this.updateStatus('Loading...');
+    }
+
+    private onLoadProgress(e:{lengthComputable:boolean, loaded:number, total:number}) {
+        if (!e.lengthComputable)
+            return;
+        var progressBar = (<HTMLProgressElement>$('#progressBar'));
+        show(progressBar);
+        progressBar.max = e.total;
+        progressBar.value = e.loaded;
+    }
+
     private moduleDidLoad() {
         this.updateStatus('　');
+        hide($('#progressBar'));
         this.zoom.init();
         if (this.webMidiLinkUrl)
             this.midiPlayer = new MidiPlayer(this.webMidiLinkUrl);

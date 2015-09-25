@@ -42,6 +42,8 @@ var XSystem35 = (function () {
         show($('#contents'));
         document.body.classList.add('bgblack-fade');
         var listener = $('#contents');
+        listener.addEventListener('loadstart', this.onLoadStart.bind(this), true);
+        listener.addEventListener('progress', this.onLoadProgress.bind(this), true);
         listener.addEventListener('load', this.moduleDidLoad.bind(this), true);
         listener.addEventListener('message', this.handleMessage.bind(this), true);
         listener.addEventListener('error', this.handleError.bind(this), true);
@@ -49,8 +51,20 @@ var XSystem35 = (function () {
         setupTouchHandlers(this.naclModule);
         requestFileSystem().then(function (fs) { return _this.audio = new AudioPlayer(fs.root.toURL()); });
     };
+    XSystem35.prototype.onLoadStart = function () {
+        this.updateStatus('Loading...');
+    };
+    XSystem35.prototype.onLoadProgress = function (e) {
+        if (!e.lengthComputable)
+            return;
+        var progressBar = $('#progressBar');
+        show(progressBar);
+        progressBar.max = e.total;
+        progressBar.value = e.loaded;
+    };
     XSystem35.prototype.moduleDidLoad = function () {
         this.updateStatus('　');
+        hide($('#progressBar'));
         this.zoom.init();
         if (this.webMidiLinkUrl)
             this.midiPlayer = new MidiPlayer(this.webMidiLinkUrl);
