@@ -339,7 +339,7 @@ var AudioPlayer = (function () {
 })();
 var MidiPlayer = (function () {
     function MidiPlayer(url) {
-        this.worker = new Worker('midi-worker.js');
+        this.worker = new Worker('js/midi-worker.js');
         this.iframe = document.createElement('iframe');
         this.worker.addEventListener('message', this.onMessageFromWorker.bind(this));
         window.addEventListener('message', this.onMessageFromIframe.bind(this));

@@ -6,7 +6,7 @@ var InstallerHost = (function () {
         this.initWorker();
     }
     InstallerHost.prototype.initWorker = function () {
-        this.worker = new Worker('installer-worker.js');
+        this.worker = new Worker('js/installer-worker.js');
         this.worker.addEventListener('message', this.onMessage.bind(this));
         this.worker.addEventListener('error', this.onError.bind(this));
     };

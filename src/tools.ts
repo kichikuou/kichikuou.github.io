@@ -2,7 +2,7 @@ class ToolsHost {
     private worker: Worker;
 
     constructor() {
-        this.worker = new Worker('tools-worker.js');
+        this.worker = new Worker('js/tools-worker.js');
         this.worker.addEventListener('message', this.onMessage.bind(this));
         this.worker.addEventListener('error', this.onError.bind(this));
     }

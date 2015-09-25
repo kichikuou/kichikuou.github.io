@@ -3,7 +3,7 @@ class AdvancedInstallerHost {
     private fontBlob: Promise<Blob>;
 
     constructor(private view:AdvancedInstallerView) {
-        this.worker = new Worker('installer-worker.js?advanced');
+        this.worker = new Worker('js/installer-worker.js?advanced');
         this.worker.addEventListener('message', this.onMessage.bind(this));
         this.worker.addEventListener('error', this.onError.bind(this));
     }

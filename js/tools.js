@@ -1,6 +1,6 @@
 var ToolsHost = (function () {
     function ToolsHost() {
-        this.worker = new Worker('tools-worker.js');
+        this.worker = new Worker('js/tools-worker.js');
         this.worker.addEventListener('message', this.onMessage.bind(this));
         this.worker.addEventListener('error', this.onError.bind(this));
     }
