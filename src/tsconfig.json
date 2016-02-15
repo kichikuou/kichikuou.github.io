@@ -23,5 +23,8 @@
         "./play.ts",
         "./tools.ts",
         "./typings/tsd.d.ts"
-    ]
+    ],
+    "atom": {
+        "rewriteTsconfig": true
+    }
 }

@@ -9,6 +9,10 @@ function hide(elem:HTMLElement) {
     elem.classList.add('hidden');
 }
 
+function isVisible(elem:HTMLElement): boolean {
+    return !elem.classList.contains('hidden');
+}
+
 function requestFileSystem(): Promise<FileSystem> {
     return new Promise(function(resolve, reject) {
         if (!window.webkitRequestFileSystem)
@@ -25,10 +29,4 @@ function isInstalled(): Promise<boolean> {
             fs.root.getDirectory('save', {}, () => resolve(true), () => resolve(false));
         });
     });
-}
-
-// Migrate from old configuration
-if (localStorage.getItem('nmf')) {
-    localStorage.setItem('antialias', 'true');
-    localStorage.removeItem('nmf');
 }

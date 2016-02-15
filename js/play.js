@@ -54,7 +54,10 @@ var XSystem35 = (function () {
         if (!e.lengthComputable)
             return;
         var progressBar = $('#progressBar');
-        show(progressBar);
+        if (!isVisible(progressBar)) {
+            show(progressBar);
+            ga('send', 'event', 'play', 'slow-load');
+        }
         progressBar.max = e.total;
         progressBar.value = e.loaded;
     };
@@ -168,7 +171,7 @@ var XSystem35 = (function () {
             this.reply(data, data.default);
     };
     return XSystem35;
-})();
+}());
 var ZoomManager = (function () {
     function ZoomManager() {
         this.nonFullScreenRatio = 1;
@@ -226,7 +229,7 @@ var ZoomManager = (function () {
         }
     };
     return ZoomManager;
-})();
+}());
 var TouchState;
 (function (TouchState) {
     TouchState[TouchState["Up"] = 0] = "Up";
@@ -346,7 +349,7 @@ var AudioPlayer = (function () {
         return this.bgmDir + (this.tracks[n] || 'track' + n + '.wav');
     };
     return AudioPlayer;
-})();
+}());
 var MidiPlayer = (function () {
     function MidiPlayer(url) {
         this.worker = new Worker('js/midi-worker.js');
@@ -369,7 +372,7 @@ var MidiPlayer = (function () {
         this.worker.postMessage(evt.data);
     };
     return MidiPlayer;
-})();
+}());
 var EucjpEncoder = (function () {
     function EucjpEncoder() {
         if (!EucjpEncoder.table)
@@ -404,5 +407,5 @@ var EucjpEncoder = (function () {
         }
     };
     return EucjpEncoder;
-})();
+}());
 var xsystem35 = new XSystem35;

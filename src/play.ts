@@ -72,7 +72,10 @@ class XSystem35 {
         if (!e.lengthComputable)
             return;
         var progressBar = (<HTMLProgressElement>$('#progressBar'));
-        show(progressBar);
+        if (!isVisible(progressBar)) {
+            show(progressBar);
+            ga('send', 'event', 'play', 'slow-load');
+        }
         progressBar.max = e.total;
         progressBar.value = e.loaded;
     }

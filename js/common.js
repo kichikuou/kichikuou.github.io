@@ -5,6 +5,9 @@ function show(elem) {
 function hide(elem) {
     elem.classList.add('hidden');
 }
+function isVisible(elem) {
+    return !elem.classList.contains('hidden');
+}
 function requestFileSystem() {
     return new Promise(function (resolve, reject) {
         if (!window.webkitRequestFileSystem)
@@ -20,8 +23,4 @@ function isInstalled() {
             fs.root.getDirectory('save', {}, function () { return resolve(true); }, function () { return resolve(false); });
         });
     });
-}
-if (localStorage.getItem('nmf')) {
-    localStorage.setItem('antialias', 'true');
-    localStorage.removeItem('nmf');
 }
