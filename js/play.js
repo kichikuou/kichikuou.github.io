@@ -2,6 +2,7 @@ var XSystem35 = (function () {
     function XSystem35() {
         isInstalled().then(this.init.bind(this), function () { return show($('.unsupported')); });
         this.naclModule = $('#nacl_module');
+        this.volumeControl = new VolumeControl();
         this.zoom = new ZoomManager();
         this.webMidiLinkUrl = localStorage.getItem('midi');
         var naclArgs = [];
@@ -48,7 +49,7 @@ var XSystem35 = (function () {
         listener.addEventListener('error', this.handleError.bind(this), true);
         listener.addEventListener('crash', this.handleCrash.bind(this), true);
         setupTouchHandlers(this.naclModule);
-        requestFileSystem().then(function (fs) { return _this.audio = new AudioPlayer(fs.root.toURL()); });
+        requestFileSystem().then(function (fs) { return _this.audio = new AudioPlayer(fs.root.toURL(), _this.volumeControl); });
     };
     XSystem35.prototype.onLoadProgress = function (e) {
         if (!e.lengthComputable)
@@ -65,8 +66,9 @@ var XSystem35 = (function () {
         this.updateStatus('　');
         hide($('#progressBar'));
         this.zoom.init();
+        this.volumeControl.init();
         if (this.webMidiLinkUrl)
-            this.midiPlayer = new MidiPlayer(this.webMidiLinkUrl);
+            this.midiPlayer = new MidiPlayer(this.webMidiLinkUrl, this.volumeControl);
     };
     XSystem35.prototype.handleMessage = function (message) {
         var data = message.data;
@@ -306,21 +308,72 @@ function setupTouchHandlers(element) {
         element.dispatchEvent(mouseEvent);
     }
 }
-var AudioPlayer = (function () {
-    function AudioPlayer(bgmDir) {
-        this.bgmDir = bgmDir;
-        this.volume = Number(localStorage.getItem('volume') || 1);
+var VolumeControl = (function () {
+    function VolumeControl() {
+        this.vol = Number(localStorage.getItem('volume') || 1);
         this.muted = false;
+        this.elem = document.getElementById('volume-control');
+        this.icon = document.getElementById('volume-control-icon');
+        this.slider = document.getElementById('volume-control-slider');
+        this.slider.value = Math.round(this.vol * 100) + '';
+        this.icon.addEventListener('click', this.onIconClicked.bind(this));
+        this.slider.addEventListener('input', this.onSliderValueChanged.bind(this));
+        this.slider.addEventListener('change', this.onSliderValueSettled.bind(this));
+    }
+    VolumeControl.prototype.init = function () {
+        show(this.elem);
+    };
+    VolumeControl.prototype.volume = function () {
+        return this.muted ? 0 : parseInt(this.slider.value) / 100;
+    };
+    VolumeControl.prototype.addEventListener = function (handler) {
+        this.elem.addEventListener('volumechange', handler);
+    };
+    VolumeControl.prototype.onIconClicked = function (e) {
+        this.muted = !this.muted;
+        if (this.muted) {
+            this.icon.classList.remove('fa-volume-up');
+            this.icon.classList.add('fa-volume-off');
+            this.slider.value = '0';
+        }
+        else {
+            this.icon.classList.remove('fa-volume-off');
+            this.icon.classList.add('fa-volume-up');
+            this.slider.value = String(Math.round(this.vol * 100));
+        }
+        this.dispatchEvent();
+    };
+    VolumeControl.prototype.onSliderValueChanged = function (e) {
+        this.vol = parseInt(this.slider.value) / 100;
+        if (this.vol > 0 && this.muted) {
+            this.muted = false;
+            this.icon.classList.remove('fa-volume-off');
+            this.icon.classList.add('fa-volume-up');
+        }
+        this.dispatchEvent();
+    };
+    VolumeControl.prototype.onSliderValueSettled = function (e) {
+        localStorage.setItem('volume', this.vol + '');
+    };
+    VolumeControl.prototype.dispatchEvent = function () {
+        var event = new CustomEvent('volumechange', { detail: this.volume() });
+        this.elem.dispatchEvent(event);
+    };
+    return VolumeControl;
+}());
+var AudioPlayer = (function () {
+    function AudioPlayer(bgmDir, volumeControl) {
+        this.bgmDir = bgmDir;
+        this.volumeControl = volumeControl;
         this.tracks = JSON.parse(localStorage.getItem('tracks') || '[]');
+        volumeControl.addEventListener(this.onVolumeChanged.bind(this));
     }
     AudioPlayer.prototype.play = function (track, loop) {
         if (this.elem)
             this.stop();
         var audio = document.createElement('audio');
         audio.setAttribute('src', this.trackURL(track));
-        audio.setAttribute('controls', 'true');
-        audio.volume = this.volume;
-        audio.muted = this.muted;
+        audio.volume = this.volumeControl.volume();
         audio.loop = (loop != 0);
         document.getElementById('contents').appendChild(audio);
         audio.load();
@@ -331,12 +384,9 @@ var AudioPlayer = (function () {
     AudioPlayer.prototype.stop = function () {
         if (this.elem) {
             this.elem.pause();
-            this.volume = this.elem.volume;
-            this.muted = this.elem.muted;
             this.elem.parentNode.removeChild(this.elem);
             this.elem = null;
             this.currentTrack = 0;
-            localStorage.setItem('volume', this.volume + '');
         }
     };
     AudioPlayer.prototype.getPosition = function () {
@@ -348,16 +398,23 @@ var AudioPlayer = (function () {
     AudioPlayer.prototype.trackURL = function (n) {
         return this.bgmDir + (this.tracks[n] || 'track' + n + '.wav');
     };
+    AudioPlayer.prototype.onVolumeChanged = function (evt) {
+        if (this.elem)
+            this.elem.volume = evt.detail;
+    };
     return AudioPlayer;
 }());
 var MidiPlayer = (function () {
-    function MidiPlayer(url) {
+    function MidiPlayer(url, volumeControl) {
+        this.volumeControl = volumeControl;
         this.worker = new Worker('js/midi-worker.js');
         this.iframe = document.createElement('iframe');
         this.worker.addEventListener('message', this.onMessageFromWorker.bind(this));
         window.addEventListener('message', this.onMessageFromIframe.bind(this));
         this.iframe.src = url;
         document.body.appendChild(this.iframe);
+        volumeControl.addEventListener(this.onVolumeChanged.bind(this));
+        this.worker.postMessage({ command: 'volume', value: volumeControl.volume() });
     }
     MidiPlayer.prototype.play = function (buf) {
         this.worker.postMessage({ command: 'play', smf: buf });
@@ -370,6 +427,9 @@ var MidiPlayer = (function () {
     };
     MidiPlayer.prototype.onMessageFromIframe = function (evt) {
         this.worker.postMessage(evt.data);
+    };
+    MidiPlayer.prototype.onVolumeChanged = function (evt) {
+        this.worker.postMessage({ command: 'volume', value: evt.detail });
     };
     return MidiPlayer;
 }());
