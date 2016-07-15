@@ -6,6 +6,7 @@ interface PNaClElement extends HTMLElement {
 
 class XSystem35 {
     private naclModule:PNaClElement;
+    private volumeControl: VolumeControl;
     private audio:AudioPlayer;
     private zoom:ZoomManager;
     private webMidiLinkUrl:string;
@@ -15,6 +16,7 @@ class XSystem35 {
         isInstalled().then(this.init.bind(this), () => show($('.unsupported')));
 
         this.naclModule = <PNaClElement>$('#nacl_module');
+        this.volumeControl = new VolumeControl();
         this.zoom = new ZoomManager();
         this.webMidiLinkUrl = localStorage.getItem('midi');
 
@@ -64,8 +66,10 @@ class XSystem35 {
         listener.addEventListener('crash', this.handleCrash.bind(this), true);
         setupTouchHandlers(this.naclModule);
 
+        this.volumeControl.addEventListener(this.updateVolume.bind(this));
+
         requestFileSystem().then(
-            (fs) => this.audio = new AudioPlayer(fs.root.toURL()));
+            (fs) => this.audio = new AudioPlayer(fs.root.toURL(), this.volumeControl));
     }
 
     private onLoadProgress(e:{lengthComputable:boolean, loaded:number, total:number}) {
@@ -84,13 +88,17 @@ class XSystem35 {
         this.updateStatus('　');
         hide($('#progressBar'));
         this.zoom.init();
+        this.volumeControl.init();
         if (this.webMidiLinkUrl)
-            this.midiPlayer = new MidiPlayer(this.webMidiLinkUrl);
+            this.midiPlayer = new MidiPlayer(this.webMidiLinkUrl, this.volumeControl);
     }
 
     private handleMessage(message:any) {
         var data = message.data;
         switch (data.command) {
+        case 'ready':
+            this.onNaclReady();
+            break;
         case 'exit':
             console.log('exit code: ' + data.code);
             // Kill PNaCl module and reboot after 3 seconds
@@ -156,6 +164,10 @@ class XSystem35 {
         this.postMessage({'naclmsg':result});
     }
 
+    private updateVolume() {
+        this.postMessage({'setvolume': Math.round(this.volumeControl.volume() * 256)});
+    }
+
     private updateStatus(status:string) {
         $('.pnacl-status').textContent = status;
     }
@@ -172,6 +184,10 @@ class XSystem35 {
         var title = s.slice(s.indexOf(':')+1);
         ga('send', 'event', 'play', 'gamestart', title);
         $('title').textContent = title + ' - 鬼畜王 on Chrome';
+    }
+
+    private onNaclReady() {
+        this.updateVolume();
     }
 
     private inputString(data:{title:ArrayBuffer, oldstring:ArrayBuffer, maxlen:number}) {
@@ -343,17 +359,81 @@ function setupTouchHandlers(element:HTMLElement) {
     }
 }
 
+class VolumeControl {
+    private vol: number;  // 0.0 - 1.0
+    private muted: boolean;
+    private elem: HTMLElement;
+    private icon: HTMLElement;
+    private slider: HTMLInputElement;
+
+    constructor() {
+        this.vol = Number(localStorage.getItem('volume') || 1);
+        this.muted = false;
+
+        this.elem = document.getElementById('volume-control');
+        this.icon = document.getElementById('volume-control-icon');
+        this.slider = <HTMLInputElement>document.getElementById('volume-control-slider');
+        this.slider.value = Math.round(this.vol * 100) + '';
+
+        this.icon.addEventListener('click', this.onIconClicked.bind(this));
+        this.slider.addEventListener('input', this.onSliderValueChanged.bind(this));
+        this.slider.addEventListener('change', this.onSliderValueSettled.bind(this));
+    }
+
+    init() {
+        show(this.elem);
+    }
+
+    volume(): number {
+        return this.muted ? 0 : parseInt(this.slider.value) / 100;
+    }
+
+    addEventListener(handler: (evt: CustomEvent) => any) {
+        this.elem.addEventListener('volumechange', handler);
+    }
+
+    private onIconClicked(e: Event) {
+        this.muted = !this.muted;
+        if (this.muted) {
+            this.icon.classList.remove('fa-volume-up');
+            this.icon.classList.add('fa-volume-off');
+            this.slider.value = '0';
+        } else {
+            this.icon.classList.remove('fa-volume-off');
+            this.icon.classList.add('fa-volume-up');
+            this.slider.value = String(Math.round(this.vol * 100));
+        }
+        this.dispatchEvent();
+    }
+
+    private onSliderValueChanged(e: Event) {
+        this.vol = parseInt(this.slider.value) / 100;
+        if (this.vol > 0 && this.muted) {
+            this.muted = false;
+            this.icon.classList.remove('fa-volume-off');
+            this.icon.classList.add('fa-volume-up');
+        }
+        this.dispatchEvent();
+    }
+
+    private onSliderValueSettled(e: Event) {
+        localStorage.setItem('volume', this.vol + '');
+    }
+
+    private dispatchEvent() {
+        var event = new CustomEvent('volumechange', {detail: this.volume()});
+        this.elem.dispatchEvent(event);
+    }
+}
+
 class AudioPlayer {
     private elem:HTMLAudioElement;
     private currentTrack:number;
-    private volume:number;
-    private muted:boolean;
     private tracks:string[];
 
-    constructor(private bgmDir:string) {
-        this.volume = Number(localStorage.getItem('volume') || 1);
-        this.muted = false;
+    constructor(private bgmDir:string, private volumeControl: VolumeControl) {
         this.tracks = JSON.parse(localStorage.getItem('tracks') || '[]');
+        volumeControl.addEventListener(this.onVolumeChanged.bind(this));
     }
 
     play(track:number, loop:number) {
@@ -362,9 +442,7 @@ class AudioPlayer {
 
         var audio = document.createElement('audio');
         audio.setAttribute('src', this.trackURL(track));
-        audio.setAttribute('controls', 'true');
-        audio.volume = this.volume;
-        audio.muted = this.muted;
+        audio.volume = this.volumeControl.volume();
         audio.loop = (loop != 0);
         document.getElementById('contents').appendChild(audio);
         audio.load();
@@ -376,12 +454,9 @@ class AudioPlayer {
     stop() {
         if (this.elem) {
             this.elem.pause();
-            this.volume = this.elem.volume;
-            this.muted = this.elem.muted;
             this.elem.parentNode.removeChild(this.elem);
             this.elem = null;
             this.currentTrack = 0;
-            localStorage.setItem('volume', this.volume + '');
         }
     }
 
@@ -396,19 +471,27 @@ class AudioPlayer {
     private trackURL(n:number): string {
         return this.bgmDir + (this.tracks[n] || 'track' + n + '.wav');
     }
+
+    private onVolumeChanged(evt: CustomEvent) {
+        if (this.elem)
+            this.elem.volume = evt.detail;
+    }
 }
 
 class MidiPlayer {
     private worker: Worker;
     private iframe: HTMLIFrameElement;
 
-    constructor(url:string) {
+    constructor(url: string, private volumeControl: VolumeControl) {
         this.worker = new Worker('js/midi-worker.js');
         this.iframe = document.createElement('iframe');
         this.worker.addEventListener('message', this.onMessageFromWorker.bind(this));
         window.addEventListener('message', this.onMessageFromIframe.bind(this));
         this.iframe.src = url;
         document.body.appendChild(this.iframe);
+
+        volumeControl.addEventListener(this.onVolumeChanged.bind(this));
+        this.worker.postMessage({command: 'volume', value: volumeControl.volume()});
     }
 
     play(buf:ArrayBuffer) {
@@ -425,6 +508,10 @@ class MidiPlayer {
 
     private onMessageFromIframe(evt: MessageEvent) {
         this.worker.postMessage(evt.data);
+    }
+
+    private onVolumeChanged(evt: CustomEvent) {
+        this.worker.postMessage({command: 'volume', value: evt.detail});
     }
 }
 

@@ -12,8 +12,10 @@ addEventListener('message', function (evt) {
         case 'stop':
             smfPlayer.stop();
             break;
+        case 'volume':
+            smfPlayer.setMasterVolume(16383 * 0.4 * evt.data.value);
+            break;
     }
 });
 smfPlayer.setLoop(true);
-smfPlayer.setMasterVolume(16383 * 0.3);
 smfPlayer.setWebMidiLink(self);

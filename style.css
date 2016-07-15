@@ -131,6 +131,25 @@ dd {
     box-shadow: none;
 }
 
+#volume-control {
+    float: right;
+    margin-right: 20px;
+}
+
+#volume-control-icon {
+    font-size: 20px;
+    width: 20px;
+    padding: 5px;
+    vertical-align: middle;
+    color: white;
+}
+
+#volume-control-slider {
+    width: 60px;
+    height: 30px;
+    vertical-align: middle;
+}
+
 body > iframe {
     width: 1px;
     height: 1px;

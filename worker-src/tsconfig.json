@@ -23,5 +23,8 @@
         "./typings/lib.core.d.ts",
         "./typings/lib.webworker.d.ts",
         "./typings/tsd.d.ts"
-    ]
+    ],
+    "atom": {
+        "rewriteTsconfig": true
+    }
 }
