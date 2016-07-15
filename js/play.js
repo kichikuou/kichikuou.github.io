@@ -49,6 +49,7 @@ var XSystem35 = (function () {
         listener.addEventListener('error', this.handleError.bind(this), true);
         listener.addEventListener('crash', this.handleCrash.bind(this), true);
         setupTouchHandlers(this.naclModule);
+        this.volumeControl.addEventListener(this.updateVolume.bind(this));
         requestFileSystem().then(function (fs) { return _this.audio = new AudioPlayer(fs.root.toURL(), _this.volumeControl); });
     };
     XSystem35.prototype.onLoadProgress = function (e) {
@@ -73,6 +74,9 @@ var XSystem35 = (function () {
     XSystem35.prototype.handleMessage = function (message) {
         var data = message.data;
         switch (data.command) {
+            case 'ready':
+                this.onNaclReady();
+                break;
             case 'exit':
                 console.log('exit code: ' + data.code);
                 hide($('#contents'));
@@ -134,6 +138,9 @@ var XSystem35 = (function () {
             'naclmsg_id': data['naclmsg_id'] };
         this.postMessage({ 'naclmsg': result });
     };
+    XSystem35.prototype.updateVolume = function () {
+        this.postMessage({ 'setvolume': Math.round(this.volumeControl.volume() * 256) });
+    };
     XSystem35.prototype.updateStatus = function (status) {
         $('.pnacl-status').textContent = status;
     };
@@ -148,6 +155,9 @@ var XSystem35 = (function () {
         var title = s.slice(s.indexOf(':') + 1);
         ga('send', 'event', 'play', 'gamestart', title);
         $('title').textContent = title + ' - 鬼畜王 on Chrome';
+    };
+    XSystem35.prototype.onNaclReady = function () {
+        this.updateVolume();
     };
     XSystem35.prototype.inputString = function (data) {
         var decoder = new TextDecoder('euc-jp');

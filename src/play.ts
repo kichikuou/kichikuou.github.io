@@ -66,6 +66,8 @@ class XSystem35 {
         listener.addEventListener('crash', this.handleCrash.bind(this), true);
         setupTouchHandlers(this.naclModule);
 
+        this.volumeControl.addEventListener(this.updateVolume.bind(this));
+
         requestFileSystem().then(
             (fs) => this.audio = new AudioPlayer(fs.root.toURL(), this.volumeControl));
     }
@@ -94,6 +96,9 @@ class XSystem35 {
     private handleMessage(message:any) {
         var data = message.data;
         switch (data.command) {
+        case 'ready':
+            this.onNaclReady();
+            break;
         case 'exit':
             console.log('exit code: ' + data.code);
             // Kill PNaCl module and reboot after 3 seconds
@@ -159,6 +164,10 @@ class XSystem35 {
         this.postMessage({'naclmsg':result});
     }
 
+    private updateVolume() {
+        this.postMessage({'setvolume': Math.round(this.volumeControl.volume() * 256)});
+    }
+
     private updateStatus(status:string) {
         $('.pnacl-status').textContent = status;
     }
@@ -175,6 +184,10 @@ class XSystem35 {
         var title = s.slice(s.indexOf(':')+1);
         ga('send', 'event', 'play', 'gamestart', title);
         $('title').textContent = title + ' - 鬼畜王 on Chrome';
+    }
+
+    private onNaclReady() {
+        this.updateVolume();
     }
 
     private inputString(data:{title:ArrayBuffer, oldstring:ArrayBuffer, maxlen:number}) {
