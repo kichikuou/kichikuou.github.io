@@ -29,8 +29,23 @@ body {
     float: right;
 }
 
+@media(max-width:540px) {
+    .navbar {
+	padding: 0px;
+	overflow: auto;
+    }
+
+    .navbar .pure-menu-heading {
+	display: none;
+    }
+
+    .navbar ul {
+        float: none;
+    }
+}
+
 .contents {
-    width: 640px;
+    max-width: 640px;
     margin: 4ex auto 0;
 }
 
