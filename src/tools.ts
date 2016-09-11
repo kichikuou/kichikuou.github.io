@@ -88,7 +88,10 @@ class ToolsView {
         input.type = 'file';
         input.addEventListener('change', (evt:Event) => {
             toolsHost.uploadSaveData(input.files);
+            document.body.removeChild(input);
         });
+        input.style.display = 'none';
+        document.body.appendChild(input);
         input.click();
     }
 

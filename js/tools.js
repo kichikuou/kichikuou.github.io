@@ -30,7 +30,7 @@ var ToolsHost = (function () {
         console.log('worker error', evt);
     };
     return ToolsHost;
-})();
+}());
 var ToolsView = (function () {
     function ToolsView() {
         isInstalled().then(function (installed) {
@@ -76,7 +76,10 @@ var ToolsView = (function () {
         input.type = 'file';
         input.addEventListener('change', function (evt) {
             toolsHost.uploadSaveData(input.files);
+            document.body.removeChild(input);
         });
+        input.style.display = 'none';
+        document.body.appendChild(input);
         input.click();
     };
     ToolsView.prototype.handleDropSaveData = function (evt) {
@@ -91,7 +94,7 @@ var ToolsView = (function () {
             localStorage.removeItem('antialias');
     };
     return ToolsView;
-})();
+}());
 function dropEffect(effect) {
     return function (evt) {
         evt.stopPropagation();
