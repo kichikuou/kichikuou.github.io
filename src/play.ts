@@ -104,6 +104,9 @@ class XSystem35 {
             // Kill PNaCl module and reboot after 3 seconds
             hide($('#contents'));
             setTimeout(() => show($('#contents')), 3000);
+            this.audio.stop();
+            if (this.midiPlayer)
+                this.midiPlayer.stop();
             break;
         case 'localtime':
             this.reply(data, this.localtime(data.time));

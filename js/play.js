@@ -81,6 +81,9 @@ var XSystem35 = (function () {
                 console.log('exit code: ' + data.code);
                 hide($('#contents'));
                 setTimeout(function () { return show($('#contents')); }, 3000);
+                this.audio.stop();
+                if (this.midiPlayer)
+                    this.midiPlayer.stop();
                 break;
             case 'localtime':
                 this.reply(data, this.localtime(data.time));
