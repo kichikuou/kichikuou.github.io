@@ -110,12 +110,13 @@ body {
 }
 
 /*** Chromeﾆｲﾚﾙｿﾞ.html ***/
-dt {
+summary {
+    margin: 1ex 0;
     font-weight: bold;
 }
 
-dd {
-    margin-bottom: 1ex;
+details p {
+    margin: 1ex 0 1ex 40px;
 }
 
 /*** play.html ***/
