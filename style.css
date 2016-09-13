@@ -113,6 +113,9 @@ body {
 summary {
     margin: 1ex 0;
     font-weight: bold;
+
+    /* Overrides display:block in normalize.css v3; this is fixed in normalize.css v4. */
+    display: list-item;
 }
 
 details p {
