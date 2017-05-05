@@ -71,6 +71,15 @@ body {
     float: right;
 }
 
+aside {
+    background-color: #eee;
+    padding: 5px 10px;
+}
+
+aside h3 {
+    margin: 5px 0;
+}
+
 /*** install.html ***/
 .instructions {
     margin-bottom: 4ex;
