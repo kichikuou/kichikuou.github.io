@@ -54,30 +54,27 @@ body {
 }
 
 /*** index.html ***/
+.information {
+    background-color: #eee;
+    padding: 5px 10px;
+}
+
+.information h3 {
+    margin: 5px 0;
+}
+
+.information dd {
+    margin-bottom: 1ex;
+}
+
 .start-button {
     text-align: center;
     padding: 20px 0;
 }
 
-.history {
-    margin-bottom: 0;
-}
-.history-expander {
-    text-align: right;
-}
-
 .social-buttons {
     margin: 1em 0;
     float: right;
-}
-
-aside {
-    background-color: #eee;
-    padding: 5px 10px;
-}
-
-aside h3 {
-    margin: 5px 0;
 }
 
 /*** install.html ***/
@@ -119,7 +116,7 @@ aside h3 {
 }
 
 /*** Chromeﾆｲﾚﾙｿﾞ.html ***/
-summary {
+.instructions summary {
     margin: 1ex 0;
     font-weight: bold;
 
@@ -127,7 +124,7 @@ summary {
     display: list-item;
 }
 
-details p {
+.instructions details p {
     margin: 1ex 0 1ex 40px;
 }
 
