@@ -39,7 +39,7 @@ var AdvancedInstallerHost = (function () {
         console.log('worker error', evt);
     };
     return AdvancedInstallerHost;
-})();
+}());
 var AdvancedInstallerView = (function () {
     function AdvancedInstallerView() {
         var _this = this;
@@ -126,5 +126,5 @@ var AdvancedInstallerView = (function () {
         this.setState('uninstalling');
     };
     return AdvancedInstallerView;
-})();
+}());
 var advanced_installer_view = new AdvancedInstallerView();

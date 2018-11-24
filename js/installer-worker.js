@@ -84,7 +84,7 @@ var Installer = (function () {
         console.log(src.name);
     };
     return Installer;
-})();
+}());
 var AdvancedInstaller = (function () {
     function AdvancedInstaller() {
         addEventListener('message', this.onMessage.bind(this));
@@ -130,7 +130,7 @@ var AdvancedInstaller = (function () {
             .createWriter().write(file);
     };
     return AdvancedInstaller;
-})();
+}());
 var GameResourceGenerator = (function () {
     function GameResourceGenerator() {
         this.lines = [];
@@ -155,12 +155,12 @@ var GameResourceGenerator = (function () {
     };
     GameResourceGenerator.resourceType = { s: 'Scenario', g: 'Graphics', w: 'Wave', d: 'Data', r: 'Resource', m: 'Midi' };
     return GameResourceGenerator;
-})();
+}());
 function uninstall() {
     var fs = self.webkitRequestFileSystemSync(self.PERSISTENT, 0);
     var entries = fs.root.createReader().readEntries();
-    for (var _i = 0; _i < entries.length; _i++) {
-        var entry = entries[_i];
+    for (var _i = 0, entries_1 = entries; _i < entries_1.length; _i++) {
+        var entry = entries_1[_i];
         if (entry.isDirectory)
             entry.removeRecursively();
         else

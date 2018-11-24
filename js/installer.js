@@ -84,7 +84,7 @@ var InstallerHost = (function () {
         console.log('worker error', evt);
     };
     return InstallerHost;
-})();
+}());
 var InstallerView = (function () {
     function InstallerView() {
         var _this = this;
@@ -173,5 +173,5 @@ var InstallerView = (function () {
         this.setState('uninstalling');
     };
     return InstallerView;
-})();
+}());
 var installer_view = new InstallerView();

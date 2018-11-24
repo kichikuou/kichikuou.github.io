@@ -31,8 +31,8 @@ function extractSaveData(file) {
         return false;
     var fsroot = self.webkitRequestFileSystemSync(self.PERSISTENT, 0).root;
     var tempdir = fsroot.getDirectory('save.tmp', { create: true });
-    for (var _i = 0; _i < files.length; _i++) {
-        var f = files[_i];
+    for (var _i = 0, files_1 = files; _i < files_1.length; _i++) {
+        var f = files_1[_i];
         tempdir.getFile(basename(f.name), { create: true })
             .createWriter().write(new Blob([f.asArrayBuffer()]));
         console.log(f.name);

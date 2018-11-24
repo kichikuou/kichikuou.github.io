@@ -1,0 +1,9 @@
+{
+  "name": "kichikuou.github.io",
+  "version": "1.0.0",
+  "description": "",
+  "dependencies": {
+    "@types/filesystem": "0.0.29",
+    "@types/jszip": "0.0.27"
+  }
+}

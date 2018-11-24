@@ -1,8 +1,16 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    }
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var ISO9660FileSystem = (function () {
     function ISO9660FileSystem(sectorReader) {
         this.sectorReader = sectorReader;
@@ -52,7 +60,7 @@ var ISO9660FileSystem = (function () {
         this.sectorReader.readSequentialSectors(dirent.sector, dirent.size, callback);
     };
     return ISO9660FileSystem;
-})();
+}());
 var PVD = (function () {
     function PVD(buf) {
         this.buf = buf;
@@ -69,7 +77,7 @@ var PVD = (function () {
         return new DirEnt(this.buf, 156);
     };
     return PVD;
-})();
+}());
 var DirEnt = (function () {
     function DirEnt(buf, offset) {
         this.buf = buf;
@@ -107,7 +115,7 @@ var DirEnt = (function () {
         configurable: true
     });
     return DirEnt;
-})();
+}());
 var ImageReaderBase = (function () {
     function ImageReaderBase(image) {
         this.image = image;
@@ -131,12 +139,13 @@ var ImageReaderBase = (function () {
         }
     };
     return ImageReaderBase;
-})();
+}());
 var ImgCueReader = (function (_super) {
     __extends(ImgCueReader, _super);
     function ImgCueReader(img, cue) {
-        _super.call(this, img);
-        this.parseCue(cue);
+        var _this = _super.call(this, img) || this;
+        _this.parseCue(cue);
+        return _this;
     }
     ImgCueReader.prototype.readSector = function (sector) {
         var start = sector * 2352 + 16;
@@ -150,8 +159,8 @@ var ImgCueReader = (function (_super) {
         var lines = new FileReaderSync().readAsText(cueFile).split('\n');
         this.tracks = [];
         var currentTrack = null;
-        for (var _i = 0; _i < lines.length; _i++) {
-            var line = lines[_i];
+        for (var _i = 0, lines_1 = lines; _i < lines_1.length; _i++) {
+            var line = lines_1[_i];
             var fields = line.trim().split(/\s+/);
             switch (fields[0]) {
                 case 'TRACK':
@@ -211,7 +220,7 @@ var ImgCueReader = (function (_super) {
         return msf[0] * 60 * 75 + msf[1] * 75 + msf[2];
     };
     return ImgCueReader;
-})(ImageReaderBase);
+}(ImageReaderBase));
 var MdsTrackMode;
 (function (MdsTrackMode) {
     MdsTrackMode[MdsTrackMode["Audio"] = 169] = "Audio";
@@ -221,8 +230,9 @@ var MdsTrackMode;
 var MdfMdsReader = (function (_super) {
     __extends(MdfMdsReader, _super);
     function MdfMdsReader(mdf, mds) {
-        _super.call(this, mdf);
-        this.parseMds(mds);
+        var _this = _super.call(this, mdf) || this;
+        _this.parseMds(mds);
+        return _this;
     }
     MdfMdsReader.prototype.parseMds = function (mdsFile) {
         var buf = new FileReaderSync().readAsArrayBuffer(mdsFile);
@@ -277,7 +287,7 @@ var MdfMdsReader = (function (_super) {
         console.log(dstName);
     };
     return MdfMdsReader;
-})(ImageReaderBase);
+}(ImageReaderBase));
 function createWaveHeader(size) {
     var buf = new ArrayBuffer(44);
     var view = new DataView(buf);

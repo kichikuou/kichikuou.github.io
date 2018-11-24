@@ -12,14 +12,14 @@ function requestFileSystem() {
     return new Promise(function (resolve, reject) {
         if (!window.webkitRequestFileSystem)
             reject();
-        window.webkitRequestFileSystem(window.PERSISTENT, 0, resolve, function () { return resolve(false); });
+        window.webkitRequestFileSystem(window.PERSISTENT, 0, resolve, function () { return reject(); });
     });
 }
 function isInstalled() {
     if (!navigator.mimeTypes['application/x-pnacl'] || !window.fetch)
-        return (Promise.reject('not supported'));
-    return requestFileSystem().then(function (fs) {
-        return new Promise(function (resolve) {
+        return Promise.reject('not supported');
+    return new Promise(function (resolve) {
+        return requestFileSystem().then(function (fs) {
             fs.root.getDirectory('save', {}, function () { return resolve(true); }, function () { return resolve(false); });
         });
     });
