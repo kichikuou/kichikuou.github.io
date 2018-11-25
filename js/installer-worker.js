@@ -13,7 +13,7 @@ var Installer = (function () {
                 break;
             case 'install':
                 if (this.ready())
-                    this.install();
+                    this.install(!evt.data.isRestart);
                 break;
             case 'uninstall':
                 uninstall();
@@ -39,8 +39,10 @@ var Installer = (function () {
     Installer.prototype.ready = function () {
         return !!this.imageReader;
     };
-    Installer.prototype.install = function () {
+    Installer.prototype.install = function (clearFS) {
         var localfs = self.webkitRequestFileSystemSync(self.PERSISTENT, 650 * 1024 * 1024);
+        if (clearFS)
+            clearFileSystem(localfs);
         for (var track = 1; track <= this.imageReader.maxTrack(); track++) {
             if (track == 1) {
                 var isofs = new ISO9660FileSystem(this.imageReader);
@@ -104,6 +106,7 @@ var AdvancedInstaller = (function () {
     };
     AdvancedInstaller.prototype.install = function (files) {
         var localfs = self.webkitRequestFileSystemSync(self.PERSISTENT, 650 * 1024 * 1024);
+        clearFileSystem(localfs);
         var grGenerator = new GameResourceGenerator();
         var tracks = [];
         for (var i = 0; i < files.length; i++) {
@@ -158,6 +161,10 @@ var GameResourceGenerator = (function () {
 }());
 function uninstall() {
     var fs = self.webkitRequestFileSystemSync(self.PERSISTENT, 0);
+    clearFileSystem(fs);
+    postMessage({ command: 'uninstalled' });
+}
+function clearFileSystem(fs) {
     var entries = fs.root.createReader().readEntries();
     for (var _i = 0, entries_1 = entries; _i < entries_1.length; _i++) {
         var entry = entries_1[_i];
@@ -166,7 +173,6 @@ function uninstall() {
         else
             entry.remove();
     }
-    postMessage({ command: 'uninstalled' });
 }
 function installFont(data) {
     var fs = self.webkitRequestFileSystemSync(self.PERSISTENT, 0);

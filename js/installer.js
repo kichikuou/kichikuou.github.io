@@ -3,6 +3,7 @@ var InstallerHost = (function () {
         this.view = view;
         this.files = [];
         this.fontErrorCount = 0;
+        this.restarted = false;
         this.initWorker();
     }
     InstallerHost.prototype.initWorker = function () {
@@ -17,7 +18,7 @@ var InstallerHost = (function () {
     InstallerHost.prototype.startInstall = function () {
         var _this = this;
         navigator.webkitPersistentStorage.requestQuota(650 * 1024 * 1024, function () {
-            _this.send({ command: 'install' });
+            _this.send({ command: 'install', isRestart: _this.restarted });
             _this.view.setProgress(0, 1);
             if (!_this.fontBlob)
                 _this.fontBlob = _this.fetchFont();
@@ -70,6 +71,7 @@ var InstallerHost = (function () {
                 console.log('terminating worker');
                 this.worker.terminate();
                 this.initWorker();
+                this.restarted = true;
                 for (var _i = 0, _a = this.files; _i < _a.length; _i++) {
                     var f = _a[_i];
                     this.send({ command: 'setFile', file: f });

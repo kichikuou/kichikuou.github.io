@@ -19,7 +19,7 @@ class Installer {
             break;
         case 'install':
             if (this.ready())
-                this.install();
+                this.install(!evt.data.isRestart);
             break;
         case 'uninstall':
             uninstall();
@@ -48,8 +48,10 @@ class Installer {
         return !!this.imageReader;
     }
 
-    private install() {
+    private install(clearFS: boolean) {
         var localfs = self.webkitRequestFileSystemSync(self.PERSISTENT, 650*1024*1024);
+        if (clearFS)
+            clearFileSystem(localfs);
         for (var track = 1; track <= this.imageReader.maxTrack(); track++) {
             if (track == 1) {
                 var isofs = new ISO9660FileSystem(this.imageReader);
@@ -115,6 +117,7 @@ class AdvancedInstaller {
 
     private install(files:File[]) {
         var localfs = self.webkitRequestFileSystemSync(self.PERSISTENT, 650*1024*1024);
+        clearFileSystem(localfs);
         var grGenerator = new GameResourceGenerator();
         var tracks:string[] = [];
 
@@ -173,6 +176,11 @@ class GameResourceGenerator {
 
 function uninstall() {
     var fs = self.webkitRequestFileSystemSync(self.PERSISTENT, 0);
+    clearFileSystem(fs);
+    postMessage({command:'uninstalled'});
+}
+
+function clearFileSystem(fs: FileSystemSync) {
     var entries = fs.root.createReader().readEntries();
     for (var entry of entries) {
         if (entry.isDirectory)
@@ -180,7 +188,6 @@ function uninstall() {
         else
             entry.remove();
     }
-    postMessage({command:'uninstalled'});
 }
 
 function installFont(data:any) {

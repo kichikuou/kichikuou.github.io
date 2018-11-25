@@ -3,6 +3,7 @@ class InstallerHost {
     private files: File[] = [];
     private fontBlob: Promise<Blob>;
     private fontErrorCount = 0;
+    private restarted = false;
 
     constructor(private view:InstallerView) {
         this.initWorker();
@@ -21,7 +22,7 @@ class InstallerHost {
 
     startInstall() {
         (<any>navigator).webkitPersistentStorage.requestQuota(650*1024*1024, ()=>{
-            this.send({command:'install'});
+            this.send({command:'install', isRestart: this.restarted});
             this.view.setProgress(0, 1);
             if (!this.fontBlob)
                 this.fontBlob = this.fetchFont();
@@ -81,6 +82,7 @@ class InstallerHost {
             console.log('terminating worker');
             this.worker.terminate();
             this.initWorker();
+            this.restarted = true;
             for (var f of this.files)
                 this.send({command:'setFile', file:f});
             break;
