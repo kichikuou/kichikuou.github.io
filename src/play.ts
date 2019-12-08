@@ -1,3 +1,9 @@
+interface Document {
+    webkitFullscreenElement: any;
+}
+interface HTMLElement {
+    webkitRequestFullScreen: any;
+}
 interface PNaClElement extends HTMLElement {
     lastError: string;
     exitStatus: number;
